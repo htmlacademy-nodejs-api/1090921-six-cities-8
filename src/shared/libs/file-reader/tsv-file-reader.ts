@@ -30,7 +30,7 @@ export class TSVFileReader implements FileReader {
       createdDate,
       city,
       imagePreview,
-      image,
+      images,
       isPremium,
       isFavorite,
       rating,
@@ -53,7 +53,7 @@ export class TSVFileReader implements FileReader {
       postDate: new Date(createdDate),
       city: city as City,
       imagePreview,
-      image: this.parseImages(image),
+      images: this.parseImages(images),
       isPremium: this.parseBoolean(isPremium.toLowerCase()),
       isFavorite: this.parseBoolean(isFavorite.toLowerCase()),
       rating: this.parseNumber(rating),
@@ -86,8 +86,8 @@ export class TSVFileReader implements FileReader {
   private parseCoordinates(string: string): Coordinates {
     const [ latitude, longitude ] = string.split(',');
     return {
-      latitude: this.parseNumber(latitude),
-      longitude: this.parseNumber(longitude)
+      latitude: Number.parseFloat(latitude),
+      longitude: Number.parseFloat(longitude)
     };
   }
 
