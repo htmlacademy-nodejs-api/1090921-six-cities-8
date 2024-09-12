@@ -22,4 +22,4 @@ export type Offer = {
   author: User;
   coordinates: Coordinates;
   commentsCount?: number;
-}
+};
