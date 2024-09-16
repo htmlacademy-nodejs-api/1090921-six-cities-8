@@ -29,16 +29,17 @@ export class GenerateCommand implements Command {
   public getName(): string {
     return '--generate';
   }
+
   public async execute(...parameters: string[]): Promise<void> {
     try {
       const [count, filepath, url] = parameters;
       if (!count || !filepath || !url) {
-        throw new Error('Specify missing parameters')
+        throw new Error('Specify missing parameters');
       }
 
       const RADIX = 10;
       const offerCount = Number.parseInt(count, RADIX);
-  
+
       await this.load(url);
       await this.write(filepath, offerCount);
 

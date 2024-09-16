@@ -12,4 +12,4 @@ export interface MockServerData {
   emails: string[];
   avatars: string[];
   passwords: string[];
-};
+}

@@ -1,7 +1,7 @@
-import dayjs from "dayjs";
+import dayjs from 'dayjs';
 
-import { OfferGenerator } from "./offer-generator.interface.js";
-import { MockServerData } from "../../types/index.js";
+import { OfferGenerator } from './offer-generator.interface.js';
+import { MockServerData } from '../../types/index.js';
 import {
   generateRandomValue,
   getRandomItem,
@@ -9,8 +9,8 @@ import {
   getRandomBoolean,
   TAB_SEPARATOR,
   SEMICOLON_SEPARATOR,
-} from "../../helpers/index.js";
-import { RATING, ROOMS, GUESTS, PRICE, WEEKDAY, IMAGES_COUNT } from "./constants.js";
+} from '../../helpers/index.js';
+import { RATING, ROOMS, GUESTS, PRICE, WEEKDAY, IMAGES_COUNT } from './constants.js';
 
 export class TSVOfferGenerator implements OfferGenerator {
   constructor(private readonly mockData: MockServerData) {}
@@ -41,7 +41,7 @@ export class TSVOfferGenerator implements OfferGenerator {
     const userType = getRandomItem<string>(this.mockData.userTypes);
 
     const createdDate = dayjs()
-      .subtract(generateRandomValue(WEEKDAY.FIRST, WEEKDAY.LAST), "day")
+      .subtract(generateRandomValue(WEEKDAY.FIRST, WEEKDAY.LAST), 'day')
       .toISOString();
 
     return [

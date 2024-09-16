@@ -25,7 +25,7 @@ export class ImportCommand implements Command {
       console.error(chalk.red(getErrorMessage(err)));
     }
   }
-  
+
   private onImportedOffer(offer: Offer): void {
     console.info(offer);
   }

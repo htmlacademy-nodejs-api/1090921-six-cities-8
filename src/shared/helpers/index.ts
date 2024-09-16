@@ -11,8 +11,8 @@ export {
   ROW_SEPARATOR,
   COMMA_SEPARATOR,
   SEMICOLON_SEPARATOR
-} from './separators.js'
+} from './separators.js';
 
 export {
   CHUNK_SIZE
-} from './constants.js'
+} from './constants.js';
