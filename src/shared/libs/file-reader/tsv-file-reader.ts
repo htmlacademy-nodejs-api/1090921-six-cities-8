@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 
 import { FileReader } from './file-reader.interface.js';
 import { Offer, User, City, RentType, Amenity, Coordinates, UserType } from '../../types/index.js';
+import { SEMICOLON_SEPARATOR, COMMA_SEPARATOR, ROW_SEPARATOR, TAB_SEPARATOR } from '../../helpers/index.js';
 
 export class TSVFileReader implements FileReader {
   private rawData = '';
@@ -17,7 +18,6 @@ export class TSVFileReader implements FileReader {
   }
 
   private parseRawDataToOffers(): Offer[] {
-    const ROW_SEPARATOR = '\n';
     return this.rawData
       .split(ROW_SEPARATOR)
       .filter((row) => row.trim().length)
@@ -25,7 +25,6 @@ export class TSVFileReader implements FileReader {
   }
 
   private parseLineToOffer(line: string): Offer {
-    const TAB_SEPARATOR = '\t';
     const [
       title,
       description,
@@ -79,13 +78,11 @@ export class TSVFileReader implements FileReader {
   }
 
   private parseCollection<T>(string: string, separator?: string): T[] {
-    const DEFAULT_SEPARATOR = ';';
-    return string.split(separator || DEFAULT_SEPARATOR) as T[];
+    return string.split(separator || SEMICOLON_SEPARATOR) as T[];
   }
 
   private parseCoordinates(string: string): Coordinates {
-    const SEPARATOR = ',';
-    const [ latitude, longitude ] = string.split(SEPARATOR);
+    const [ latitude, longitude ] = string.split(COMMA_SEPARATOR);
     return {
       latitude: Number.parseFloat(latitude),
       longitude: Number.parseFloat(longitude)
