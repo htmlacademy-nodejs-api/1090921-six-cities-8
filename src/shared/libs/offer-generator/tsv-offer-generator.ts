@@ -8,7 +8,6 @@ import {
   getRandomItems,
   getRandomBoolean,
   TAB_SEPARATOR,
-  COMMA_SEPARATOR,
   SEMICOLON_SEPARATOR,
 } from "../../helpers/index.js";
 import { RATING, ROOMS, GUESTS, PRICE, WEEKDAY } from "./constants.js";
@@ -34,9 +33,7 @@ export class TSVOfferGenerator implements OfferGenerator {
     const amenities = getRandomItems(this.mockData.amenities).join(
       SEMICOLON_SEPARATOR
     );
-    const coordinates = getRandomItems(this.mockData.coordinates).join(
-      COMMA_SEPARATOR
-    );
+    const coordinates = getRandomItem(this.mockData.coordinates);
     const author = getRandomItem(this.mockData.users);
     const email = getRandomItem(this.mockData.emails);
     const avatar = getRandomItem(this.mockData.avatars);
