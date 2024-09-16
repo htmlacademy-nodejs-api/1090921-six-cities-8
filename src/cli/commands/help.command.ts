@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { Command } from './command.interface.js';
+import { Command } from './types/index.js';
 
 export class HelpCommand implements Command {
   public getName(): string {
@@ -12,9 +12,9 @@ export class HelpCommand implements Command {
         Пример:
             cli.js --<command> [--arguments]
         Команды:
-            --version:                   # выводит номер версии
-            --help:                      # печатает этот текст
-            --import <path>:             # импортирует данные из TSV
+            --version:                   # выводит номер версии package.json
+            --help:                      # выводит список доступных команд
+            --import <path>:             # импортирует данные из TSV и выводит в консоль
             --generate <n> <path> <url>  # генерирует произвольное количество тестовых данных
     `));
   }

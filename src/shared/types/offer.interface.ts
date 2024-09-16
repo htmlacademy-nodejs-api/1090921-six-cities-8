@@ -1,10 +1,10 @@
-import { User } from './user.type.js';
-import { RentType } from './rent-type.type.js';
-import { Amenity } from './amenity.type.js';
-import { City } from './city.type.js';
-import { Coordinates } from './coordinates.type.js';
+import { User } from './user.interface.js';
+import { RentType } from './rent-type.enum.js';
+import { Amenity } from './amenity.enum.js';
+import { City } from './city.enum.js';
+import { Coordinates } from './coordinates.interface.js';
 
-export type Offer = {
+export interface Offer {
   title: string;
   description: string;
   postDate: Date;
@@ -22,4 +22,4 @@ export type Offer = {
   author: User;
   coordinates: Coordinates;
   commentsCount?: number;
-};
+}

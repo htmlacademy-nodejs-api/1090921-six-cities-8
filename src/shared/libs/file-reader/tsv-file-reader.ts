@@ -11,19 +11,21 @@ export class TSVFileReader implements FileReader {
   ) {}
 
   private validateRawData(): void {
-    if (! this.rawData) {
+    if (!this.rawData) {
       throw new Error('File was not read');
     }
   }
 
   private parseRawDataToOffers(): Offer[] {
+    const ROW_SEPARATOR = '\n';
     return this.rawData
-      .split('\n')
-      .filter((row) => row.trim().length > 0)
+      .split(ROW_SEPARATOR)
+      .filter((row) => row.trim().length)
       .map((line) => this.parseLineToOffer(line));
   }
 
   private parseLineToOffer(line: string): Offer {
+    const TAB_SEPARATOR = '\t';
     const [
       title,
       description,
@@ -45,7 +47,7 @@ export class TSVFileReader implements FileReader {
       avatar,
       password,
       userType
-    ] = line.split('\t');
+    ] = line.split(TAB_SEPARATOR);
 
     return {
       title,
@@ -53,7 +55,7 @@ export class TSVFileReader implements FileReader {
       postDate: new Date(createdDate),
       city: city as City,
       imagePreview,
-      images: this.parseImages(images),
+      images: this.parseCollection<string>(images),
       isPremium: this.parseBoolean(isPremium.toLowerCase()),
       isFavorite: this.parseBoolean(isFavorite.toLowerCase()),
       rating: this.parseNumber(rating),
@@ -61,30 +63,29 @@ export class TSVFileReader implements FileReader {
       roomsCount: this.parseNumber(roomsCount),
       guestsCount: this.parseNumber(guestsCount),
       price: this.parseNumber(price),
-      amenities: this.parseAmenities(amenities),
+      amenities: this.parseCollection<Amenity>(amenities),
       coordinates: this.parseCoordinates(coordinates),
       author: this.parseUser(name, email, avatar, password, userType),
     };
   }
 
   private parseNumber(string: string): number {
-    return Number.parseInt(string, 10);
+    const RADIX = 10;
+    return Number.parseInt(string, RADIX);
   }
 
   private parseBoolean(boolString: string): boolean {
     return (/true/).test(boolString);
   }
 
-  private parseImages(string: string): string[] {
-    return string.split(';').map((name) => (name));
-  }
-
-  private parseAmenities(string: string): Amenity[] {
-    return string.split(';').map((name) => (name as Amenity));
+  private parseCollection<T>(string: string, separator?: string): T[] {
+    const DEFAULT_SEPARATOR = ';';
+    return string.split(separator || DEFAULT_SEPARATOR) as T[];
   }
 
   private parseCoordinates(string: string): Coordinates {
-    const [ latitude, longitude ] = string.split(',');
+    const SEPARATOR = ',';
+    const [ latitude, longitude ] = string.split(SEPARATOR);
     return {
       latitude: Number.parseFloat(latitude),
       longitude: Number.parseFloat(longitude)
