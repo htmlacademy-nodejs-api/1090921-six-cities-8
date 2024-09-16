@@ -2,7 +2,8 @@ export function generateRandomValue(min:number, max: number, numAfterDigit = 0) 
   return +((Math.random() * (max - min)) + min).toFixed(numAfterDigit);
 }
 export function getRandomBoolean(): boolean {
-  return Math.random() >= 0.5;
+  const middle = 0.5;
+  return Math.random() >= middle;
 }
 
 export function getRandomItems<T>(items: T[], minNumber?: number):T[] {
