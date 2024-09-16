@@ -10,7 +10,7 @@ import {
   TAB_SEPARATOR,
   SEMICOLON_SEPARATOR,
 } from "../../helpers/index.js";
-import { RATING, ROOMS, GUESTS, PRICE, WEEKDAY } from "./constants.js";
+import { RATING, ROOMS, GUESTS, PRICE, WEEKDAY, IMAGES_COUNT } from "./constants.js";
 
 export class TSVOfferGenerator implements OfferGenerator {
   constructor(private readonly mockData: MockServerData) {}
@@ -20,7 +20,7 @@ export class TSVOfferGenerator implements OfferGenerator {
     const description = getRandomItem<string>(this.mockData.descriptions);
     const city = getRandomItem<string>(this.mockData.cities);
     const imagePreview = getRandomItem<string>(this.mockData.imagePreviews);
-    const images = getRandomItems(this.mockData.images).join(
+    const images = getRandomItems(this.mockData.images, IMAGES_COUNT).join(
       SEMICOLON_SEPARATOR
     );
     const isPremium = getRandomBoolean();

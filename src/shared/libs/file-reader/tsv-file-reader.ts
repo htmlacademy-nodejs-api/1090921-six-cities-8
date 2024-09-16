@@ -114,7 +114,8 @@ export class TSVFileReader extends EventEmitter implements FileReader {
         remainingData = remainingData.slice(++nextLinePosition);
         importedRowCount++;
 
-        const parsedOffer = this.parseLineToOffer(completeRow);
+        const trimmedRow = completeRow.slice(0, completeRow.indexOf(ROW_SEPARATOR));
+        const parsedOffer = this.parseLineToOffer(trimmedRow);
         this.emit('line', parsedOffer);
       }
     }

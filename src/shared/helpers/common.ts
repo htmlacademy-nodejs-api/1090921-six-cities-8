@@ -5,7 +5,8 @@ export function getRandomBoolean(): boolean {
   return Math.random() >= 0.5;
 }
 
-export function getRandomItems<T>(items: T[]):T[] {
+export function getRandomItems<T>(items: T[], minNumber?: number):T[] {
+  if (minNumber) return items.slice(0, minNumber ?? items.length - 1);
   const startPosition = generateRandomValue(0, items.length - 1);
   const endPosition = startPosition + generateRandomValue(startPosition, items.length);
   return items.slice(startPosition, endPosition);
