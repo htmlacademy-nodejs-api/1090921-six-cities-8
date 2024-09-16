@@ -1,15 +1,18 @@
-import { readFileSync } from 'node:fs';
+import EventEmitter from 'node:events';
+import { createReadStream } from 'node:fs';
 
 import { FileReader } from './file-reader.interface.js';
 import { Offer, User, City, RentType, Amenity, Coordinates, UserType } from '../../types/index.js';
-import { SEMICOLON_SEPARATOR, COMMA_SEPARATOR, ROW_SEPARATOR, TAB_SEPARATOR } from '../../helpers/index.js';
+import { SEMICOLON_SEPARATOR, COMMA_SEPARATOR, ROW_SEPARATOR, TAB_SEPARATOR, CHUNK_SIZE } from '../../helpers/index.js';
 
-export class TSVFileReader implements FileReader {
+export class TSVFileReader extends EventEmitter implements FileReader {
   private rawData = '';
 
   constructor(
     private readonly filename: string
-  ) {}
+  ) {
+    super();
+  }
 
   private validateRawData(): void {
     if (!this.rawData) {
@@ -93,8 +96,30 @@ export class TSVFileReader implements FileReader {
     return { name, email, avatar, password, type: type as UserType };
   }
 
-  public read(): void {
-    this.rawData = readFileSync(this.filename, { encoding: 'utf-8' });
+  public async read(): Promise<void> {
+    const readStream = createReadStream(this.filename, {
+      highWaterMark: CHUNK_SIZE,
+      encoding: 'utf-8',
+    });
+
+    let remainingData = '';
+    let nextLinePosition = -1;
+    let importedRowCount = 0;
+
+    for await (const chunk of readStream) {
+      remainingData += chunk.toString();
+
+      while ((nextLinePosition = remainingData.indexOf(ROW_SEPARATOR)) >= 0) {
+        const completeRow = remainingData.slice(0, nextLinePosition + 1);
+        remainingData = remainingData.slice(++nextLinePosition);
+        importedRowCount++;
+
+        const parsedOffer = this.parseLineToOffer(completeRow);
+        this.emit('line', parsedOffer);
+      }
+    }
+
+    this.emit('end', importedRowCount);
   }
 
   public toArray(): Offer[] {

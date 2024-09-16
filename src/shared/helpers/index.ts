@@ -12,3 +12,7 @@ export {
   COMMA_SEPARATOR,
   SEMICOLON_SEPARATOR
 } from './separators.js'
+
+export {
+  CHUNK_SIZE
+} from './constants.js'

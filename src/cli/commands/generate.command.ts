@@ -1,10 +1,11 @@
 import got from 'got';
+import chalk from 'chalk';
 import { appendFile } from 'node:fs/promises';
 
 import { Command } from './types/command.interface.js';
 import { MockServerData } from '../../shared/types/index.js';
 import { TSVOfferGenerator } from '../../shared/libs/offer-generator/index.js';
-import { ROW_SEPARATOR } from '../../shared/helpers/index.js';
+import { ROW_SEPARATOR, getErrorMessage } from '../../shared/helpers/index.js';
 
 export class GenerateCommand implements Command {
   private initialData: MockServerData;
@@ -42,14 +43,11 @@ export class GenerateCommand implements Command {
   
       await this.load(url);
       await this.write(filepath, offerCount);
-      
-      console.info(`File ${filepath} was created!`);
-    } catch (error: unknown) {
-      console.error('Can\'t generate data');
 
-      if (error instanceof Error) {
-        console.error(error.message);
-      }
+      console.info(`File ${filepath} was created!`);
+    } catch (error) {
+      console.error(chalk.red('Can\'t generate data'));
+      console.error(chalk.red(getErrorMessage(error)));
     }
   }
 }
