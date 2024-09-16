@@ -1,0 +1,48 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import chalk from 'chalk';
+
+import { Command, PackageJSONConfig } from './types/index.js';
+
+export class VersionCommand implements Command {
+  constructor(
+    private readonly filePath: string = 'package.json'
+  ) {}
+
+  private readVersion(): string {
+    const jsonContent = readFileSync(resolve(this.filePath), 'utf-8');
+    const importedContent: unknown = JSON.parse(jsonContent);
+
+    this.checkIfValidPackageJSON(importedContent);
+
+    return importedContent.version;
+  }
+
+  private checkIfValidPackageJSON (value: unknown): asserts value is PackageJSONConfig {
+    if (!(
+      typeof value === 'object' &&
+      value !== null &&
+      !Array.isArray(value) &&
+      Object.hasOwn(value, 'version')
+    )) {
+      throw new Error('Failed to parse json content.');
+    }
+  }
+
+  public getName(): string {
+    return '--version';
+  }
+
+  public async execute(..._parameters: string[]): Promise<void> {
+    try {
+      const version = this.readVersion();
+      console.info(chalk.greenBright(version));
+    } catch (error) {
+      console.error(chalk.redBright(`Failed to read version from ${this.filePath}`));
+
+      if (error instanceof Error) {
+        console.error(chalk.red(error.message));
+      }
+    }
+  }
+}
