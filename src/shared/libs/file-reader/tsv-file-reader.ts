@@ -1,31 +1,18 @@
-import { readFileSync } from 'node:fs';
+import EventEmitter from 'node:events';
+import { createReadStream } from 'node:fs';
 
 import { FileReader } from './file-reader.interface.js';
-import { Offer, User, City, RentType, Amenity, Coordinates, UserType } from '../../types/index.js';
+import { Offer, City, RentType, Amenity, Coordinates, UserType } from '../../types/index.js';
+import { SEMICOLON_SEPARATOR, COMMA_SEPARATOR, ROW_SEPARATOR, TAB_SEPARATOR, CHUNK_SIZE, RADIX } from '../../helpers/index.js';
 
-export class TSVFileReader implements FileReader {
-  private rawData = '';
-
+export class TSVFileReader extends EventEmitter implements FileReader {
   constructor(
     private readonly filename: string
-  ) {}
-
-  private validateRawData(): void {
-    if (!this.rawData) {
-      throw new Error('File was not read');
-    }
-  }
-
-  private parseRawDataToOffers(): Offer[] {
-    const ROW_SEPARATOR = '\n';
-    return this.rawData
-      .split(ROW_SEPARATOR)
-      .filter((row) => row.trim().length)
-      .map((line) => this.parseLineToOffer(line));
+  ) {
+    super();
   }
 
   private parseLineToOffer(line: string): Offer {
-    const TAB_SEPARATOR = '\t';
     const [
       title,
       description,
@@ -65,12 +52,11 @@ export class TSVFileReader implements FileReader {
       price: this.parseNumber(price),
       amenities: this.parseCollection<Amenity>(amenities),
       coordinates: this.parseCoordinates(coordinates),
-      author: this.parseUser(name, email, avatar, password, userType),
+      author: { name, email, avatar, password, type: userType as UserType },
     };
   }
 
   private parseNumber(string: string): number {
-    const RADIX = 10;
     return Number.parseInt(string, RADIX);
   }
 
@@ -79,29 +65,41 @@ export class TSVFileReader implements FileReader {
   }
 
   private parseCollection<T>(string: string, separator?: string): T[] {
-    const DEFAULT_SEPARATOR = ';';
-    return string.split(separator || DEFAULT_SEPARATOR) as T[];
+    return string.split(separator || SEMICOLON_SEPARATOR) as T[];
   }
 
   private parseCoordinates(string: string): Coordinates {
-    const SEPARATOR = ',';
-    const [ latitude, longitude ] = string.split(SEPARATOR);
+    const [ latitude, longitude ] = string.split(COMMA_SEPARATOR);
     return {
       latitude: Number.parseFloat(latitude),
       longitude: Number.parseFloat(longitude)
     };
   }
 
-  private parseUser(name: string, email: string, avatar: string, password: string, type: string): User {
-    return { name, email, avatar, password, type: type as UserType };
-  }
+  public async read(): Promise<void> {
+    const readStream = createReadStream(this.filename, {
+      highWaterMark: CHUNK_SIZE,
+      encoding: 'utf-8',
+    });
 
-  public read(): void {
-    this.rawData = readFileSync(this.filename, { encoding: 'utf-8' });
-  }
+    let remainingData = '';
+    let nextLinePosition = -1;
+    let importedRowCount = 0;
 
-  public toArray(): Offer[] {
-    this.validateRawData();
-    return this.parseRawDataToOffers();
+    for await (const chunk of readStream) {
+      remainingData += chunk.toString();
+
+      while ((nextLinePosition = remainingData.indexOf(ROW_SEPARATOR)) >= 0) {
+        const completeRow = remainingData.slice(0, nextLinePosition + 1);
+        remainingData = remainingData.slice(++nextLinePosition);
+        importedRowCount++;
+
+        const trimmedRow = completeRow.slice(0, completeRow.indexOf(ROW_SEPARATOR));
+        const parsedOffer = this.parseLineToOffer(trimmedRow);
+        this.emit('line', parsedOffer);
+      }
+    }
+
+    this.emit('end', importedRowCount);
   }
 }

@@ -1,0 +1,104 @@
+{
+  "api": {
+    "titles": [
+      "Sunny City Apartment",
+      "Luxury Penthouse Suite",
+      "Cozy Beach Cottage",
+      "Spacious Family Home",
+      "Modern Urban Loft",
+      "Private Garden Villa",
+      "Comfortable Shared Room",
+      "Boutique Hotel Suite"
+    ],
+    "descriptions": [
+      "A cozy studio perfect for city explorers.",
+      "Top-floor penthouse with amazing city views.",
+      "Relax in this beachside cottage, minutes from the ocean.",
+      "Ideal family home in a peaceful neighborhood.",
+      "Modern apartment with easy access to metro stations.",
+      "Private house with a garden and swimming pool.",
+      "Comfortable room in a shared apartment near downtown.",
+      "Luxurious hotel suite with complimentary breakfast."
+    ],
+    "cities": [
+      "Paris",
+      "Cologne",
+      "Brussels",
+      "Amsterdam",
+      "Hamburg",
+      "Dusseldorf"
+    ],
+    "imagePreviews": [
+      "apartment.jpg",
+      "penthouse.jpg",
+      "cottage.jpg",
+      "house.jpg",
+      "loft.jpg",
+      "villa.jpg",
+      "room.jpg",
+      "suite.jpg"
+    ],
+    "images": [
+      "image-1.jpg",
+      "image-2.jpg",
+      "image-3.jpg",
+      "image-4.jpg",
+      "image-5.jpg",
+      "image-6.jpg"
+    ],
+    "rentTypes": [
+      "apartment", "house", "room", "hotel"
+    ],
+    "amenities": ["Breakfast", "Air conditioning", "Laptop friendly workspace", "Baby seat", "Washer", "Towels", "Fridge"],
+    "coordinates": [
+      "48.85661,2.351499",
+      "50.938361,6.959974",
+      "50.846557,4.351697",
+      "52.370216,4.895168",
+      "53.550341,10.000654",
+      "51.225402,6.776314"
+    ],
+    "users": [
+      "Иван Иванов",
+      "Олег Сидоров",
+      "Пьер Безухов",
+      "Роланд Дискейн",
+      "Холи Гибни",
+      "Джек Торренс",
+      "Антон Городецкий",
+      "Борис Гесер",
+      "Рокки Бальбоа",
+      "Джон Смит"
+    ],
+    "emails": [
+      "snow@pisem.local",
+      "president@dka.local",
+      "fish@big.local",
+      "test@pisem.local",
+      "freedom@pisem.local",
+      "rolan@pochta.local",
+      "author@mir.local",
+      "test@lost.loca",
+      "kujo-fan@story.local"
+    ],
+    "avatars": [
+      "user.jpg",
+      "photo.jpg",
+      "awesome-avatar.jpg",
+      "roland.jpg",
+      "smite.jpg",
+      "coffee.jpg"
+    ],
+    "passwords": [
+      "strong_password_1",
+      "strong_password_2",
+      "strong_password_3",
+      "strong_password_4",
+      "strong_password_5",
+      "strong_password_6",
+      "strong_password_7",
+      "strong_password_8"
+    ],
+    "userTypes": ["обычный", "pro"]
+  }
+}
