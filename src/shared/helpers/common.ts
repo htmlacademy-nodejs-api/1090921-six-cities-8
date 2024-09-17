@@ -1,24 +1,19 @@
-export function generateRandomValue(min:number, max: number, numAfterDigit = 0) {
+export function generateRandomNumber(min:number, max: number, numAfterDigit = 0): number {
   return +((Math.random() * (max - min)) + min).toFixed(numAfterDigit);
 }
 export function getRandomBoolean(): boolean {
-  const middle = 0.5;
-  return Math.random() >= middle;
+  return Boolean(Math.round(Math.random()));
 }
 
 export function getRandomItems<T>(items: T[], minNumber?: number):T[] {
   if (minNumber) {
     return items.slice(0, minNumber ?? items.length - 1);
   }
-  const startPosition = generateRandomValue(0, items.length - 1);
-  const endPosition = startPosition + generateRandomValue(startPosition, items.length);
+  const startPosition = generateRandomNumber(0, items.length - 1);
+  const endPosition = startPosition + generateRandomNumber(startPosition, items.length);
   return items.slice(startPosition, endPosition);
 }
 
 export function getRandomItem<T>(items: T[]):T {
-  return items[generateRandomValue(0, items.length - 1)];
-}
-
-export function getErrorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : '';
+  return items[generateRandomNumber(0, items.length - 1)];
 }

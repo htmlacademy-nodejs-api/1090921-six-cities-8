@@ -2,29 +2,14 @@ import EventEmitter from 'node:events';
 import { createReadStream } from 'node:fs';
 
 import { FileReader } from './file-reader.interface.js';
-import { Offer, User, City, RentType, Amenity, Coordinates, UserType } from '../../types/index.js';
-import { SEMICOLON_SEPARATOR, COMMA_SEPARATOR, ROW_SEPARATOR, TAB_SEPARATOR, CHUNK_SIZE } from '../../helpers/index.js';
+import { Offer, City, RentType, Amenity, Coordinates, UserType } from '../../types/index.js';
+import { SEMICOLON_SEPARATOR, COMMA_SEPARATOR, ROW_SEPARATOR, TAB_SEPARATOR, CHUNK_SIZE, RADIX } from '../../helpers/index.js';
 
 export class TSVFileReader extends EventEmitter implements FileReader {
-  private rawData = '';
-
   constructor(
     private readonly filename: string
   ) {
     super();
-  }
-
-  private validateRawData(): void {
-    if (!this.rawData) {
-      throw new Error('File was not read');
-    }
-  }
-
-  private parseRawDataToOffers(): Offer[] {
-    return this.rawData
-      .split(ROW_SEPARATOR)
-      .filter((row) => row.trim().length)
-      .map((line) => this.parseLineToOffer(line));
   }
 
   private parseLineToOffer(line: string): Offer {
@@ -67,12 +52,11 @@ export class TSVFileReader extends EventEmitter implements FileReader {
       price: this.parseNumber(price),
       amenities: this.parseCollection<Amenity>(amenities),
       coordinates: this.parseCoordinates(coordinates),
-      author: this.parseUser(name, email, avatar, password, userType),
+      author: { name, email, avatar, password, type: userType as UserType },
     };
   }
 
   private parseNumber(string: string): number {
-    const RADIX = 10;
     return Number.parseInt(string, RADIX);
   }
 
@@ -90,10 +74,6 @@ export class TSVFileReader extends EventEmitter implements FileReader {
       latitude: Number.parseFloat(latitude),
       longitude: Number.parseFloat(longitude)
     };
-  }
-
-  private parseUser(name: string, email: string, avatar: string, password: string, type: string): User {
-    return { name, email, avatar, password, type: type as UserType };
   }
 
   public async read(): Promise<void> {
@@ -121,10 +101,5 @@ export class TSVFileReader extends EventEmitter implements FileReader {
     }
 
     this.emit('end', importedRowCount);
-  }
-
-  public toArray(): Offer[] {
-    this.validateRawData();
-    return this.parseRawDataToOffers();
   }
 }

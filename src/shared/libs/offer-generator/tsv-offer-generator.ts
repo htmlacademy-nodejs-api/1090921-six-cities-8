@@ -3,7 +3,7 @@ import dayjs from 'dayjs';
 import { OfferGenerator } from './offer-generator.interface.js';
 import { MockServerData } from '../../types/index.js';
 import {
-  generateRandomValue,
+  generateRandomNumber,
   getRandomItem,
   getRandomItems,
   getRandomBoolean,
@@ -25,11 +25,11 @@ export class TSVOfferGenerator implements OfferGenerator {
     );
     const isPremium = getRandomBoolean();
     const isFavorite = getRandomBoolean();
-    const rating = generateRandomValue(RATING.MIN, RATING.MAX).toString();
+    const rating = generateRandomNumber(RATING.MIN, RATING.MAX).toString();
     const rentType = getRandomItem<string>(this.mockData.rentTypes);
-    const roomsCount = generateRandomValue(ROOMS.MIN, ROOMS.MAX).toString();
-    const guestsCount = generateRandomValue(GUESTS.MIN, GUESTS.MAX).toString();
-    const price = generateRandomValue(PRICE.MIN, PRICE.MAX).toString();
+    const roomsCount = generateRandomNumber(ROOMS.MIN, ROOMS.MAX).toString();
+    const guestsCount = generateRandomNumber(GUESTS.MIN, GUESTS.MAX).toString();
+    const price = generateRandomNumber(PRICE.MIN, PRICE.MAX).toString();
     const amenities = getRandomItems(this.mockData.amenities).join(
       SEMICOLON_SEPARATOR
     );
@@ -41,7 +41,7 @@ export class TSVOfferGenerator implements OfferGenerator {
     const userType = getRandomItem<string>(this.mockData.userTypes);
 
     const createdDate = dayjs()
-      .subtract(generateRandomValue(WEEKDAY.FIRST, WEEKDAY.LAST), 'day')
+      .subtract(generateRandomNumber(WEEKDAY.FIRST, WEEKDAY.LAST), 'day')
       .toISOString();
 
     return [

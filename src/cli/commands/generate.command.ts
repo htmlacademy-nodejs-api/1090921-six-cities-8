@@ -5,10 +5,10 @@ import { Command } from './types/command.interface.js';
 import { MockServerData } from '../../shared/types/index.js';
 import { TSVOfferGenerator } from '../../shared/libs/offer-generator/index.js';
 import { TSVFileWriter } from '../../shared/libs/file-writer/index.js';
-import { getErrorMessage } from '../../shared/helpers/index.js';
+import { RADIX } from '../../shared/helpers/index.js';
 
 export class GenerateCommand implements Command {
-  private initialData: MockServerData;
+  private initialData!: MockServerData;
   private async load(url: string) {
     try {
       this.initialData = await got.get(url).json();
@@ -18,6 +18,9 @@ export class GenerateCommand implements Command {
   }
 
   private async write(filepath: string, offerCount: number) {
+    if (!this.initialData) {
+      throw new Error('Data was not loaded');
+    }
     const tsvOfferGenerator = new TSVOfferGenerator(this.initialData);
     const tsvFileWriter = new TSVFileWriter(filepath);
 
@@ -37,7 +40,6 @@ export class GenerateCommand implements Command {
         throw new Error('Specify missing parameters');
       }
 
-      const RADIX = 10;
       const offerCount = Number.parseInt(count, RADIX);
 
       await this.load(url);
@@ -46,7 +48,7 @@ export class GenerateCommand implements Command {
       console.info(`File ${filepath} was created!`);
     } catch (error) {
       console.error(chalk.red('Can\'t generate data'));
-      console.error(chalk.red(getErrorMessage(error)));
+      console.error(error);
     }
   }
 }

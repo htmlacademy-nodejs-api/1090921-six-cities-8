@@ -1,8 +1,6 @@
-import chalk from 'chalk';
 import { Command } from './types/index.js';
 import { TSVFileReader } from '../../shared/libs/file-reader/index.js';
 import type { Offer } from '../../shared/types/index.js';
-import { getErrorMessage } from '../../shared/helpers/index.js';
 
 export class ImportCommand implements Command {
   public getName(): string {
@@ -21,8 +19,8 @@ export class ImportCommand implements Command {
       fileReader.on('end', this.onCompleteImport);
 
       fileReader.read();
-    } catch (err) {
-      console.error(chalk.red(getErrorMessage(err)));
+    } catch (error) {
+      console.error(error);
     }
   }
 

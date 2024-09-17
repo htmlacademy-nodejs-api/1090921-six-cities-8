@@ -11,7 +11,7 @@ export class CLIApplication {
   public registerCommands(commandList: Command[]): void {
     this.commands = commandList.reduce((acc, command) => {
       if (this.commands[command.getName()]) {
-        throw new Error(`Command ${command.getName()} is already registered`);
+        return acc;
       }
       acc[command.getName()] = command;
       return acc;
@@ -30,10 +30,14 @@ export class CLIApplication {
   }
 
   public async processCommand(argv: string[]): Promise<void> {
-    const parsedCommand = CommandParser.parse(argv);
-    const [commandName] = Object.keys(parsedCommand);
-    const command = this.getCommand(commandName);
-    const commandArguments = parsedCommand[commandName] ?? [];
-    await command.execute(...commandArguments);
+    try {
+      const parsedCommand = CommandParser.parse(argv);
+      const [commandName] = Object.keys(parsedCommand);
+      const command = this.getCommand(commandName);
+      const commandArguments = parsedCommand[commandName] ?? [];
+      await command.execute(...commandArguments);
+    } catch (error) {
+      console.log(error);
+    }
   }
 }

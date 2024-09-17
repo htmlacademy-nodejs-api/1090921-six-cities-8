@@ -1,9 +1,8 @@
 export {
-  generateRandomValue,
+  generateRandomNumber,
   getRandomBoolean,
   getRandomItems,
   getRandomItem,
-  getErrorMessage,
 } from './common.js';
 
 export {
@@ -14,5 +13,6 @@ export {
 } from './separators.js';
 
 export {
-  CHUNK_SIZE
+  CHUNK_SIZE,
+  RADIX
 } from './constants.js';
