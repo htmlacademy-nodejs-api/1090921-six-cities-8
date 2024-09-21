@@ -16,3 +16,5 @@ export {
   CHUNK_SIZE,
   RADIX
 } from './constants.js';
+
+export { getCurrentModuleDirectoryPath } from './file-system.js';
