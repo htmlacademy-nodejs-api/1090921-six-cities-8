@@ -20,8 +20,6 @@ export class TSVFileReader extends EventEmitter implements FileReader {
       city,
       imagePreview,
       images,
-      isPremium,
-      isFavorite,
       rating,
       rentType,
       roomsCount,
@@ -43,8 +41,6 @@ export class TSVFileReader extends EventEmitter implements FileReader {
       city: city as City,
       imagePreview,
       images: this.parseCollection<string>(images),
-      isPremium: this.parseBoolean(isPremium.toLowerCase()),
-      isFavorite: this.parseBoolean(isFavorite.toLowerCase()),
       rating: this.parseNumber(rating),
       rentType: rentType as RentType,
       roomsCount: this.parseNumber(roomsCount),
@@ -58,10 +54,6 @@ export class TSVFileReader extends EventEmitter implements FileReader {
 
   private parseNumber(string: string): number {
     return Number.parseInt(string, RADIX);
-  }
-
-  private parseBoolean(boolString: string): boolean {
-    return (/true/).test(boolString);
   }
 
   private parseCollection<T>(string: string, separator?: string): T[] {
@@ -96,7 +88,10 @@ export class TSVFileReader extends EventEmitter implements FileReader {
 
         const trimmedRow = completeRow.slice(0, completeRow.indexOf(ROW_SEPARATOR));
         const parsedOffer = this.parseLineToOffer(trimmedRow);
-        this.emit('line', parsedOffer);
+
+        await new Promise((resolve) => {
+          this.emit('line', parsedOffer, resolve);
+        });
       }
     }
 
