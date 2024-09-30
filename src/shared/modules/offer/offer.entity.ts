@@ -43,12 +43,6 @@ export class OfferEntity extends defaultClasses.TimeStamps {
   public images!: string[];
 
   @prop({required: true})
-  public isPremium!: boolean;
-
-  @prop({required: true})
-  public isFavorite!: boolean;
-
-  @prop({required: true})
   public rating!: number;
 
   @prop({
@@ -71,7 +65,7 @@ export class OfferEntity extends defaultClasses.TimeStamps {
   public amenities!: Amenity[];
 
   @prop({
-    ref: UserEntity,
+    ref: () => UserEntity,
     required: true
   })
   public author!: Ref<UserEntity>;
@@ -79,7 +73,7 @@ export class OfferEntity extends defaultClasses.TimeStamps {
   @prop({ _id: false, required: true })
   public coordinates!: Coordinates;
 
-  @prop({default: 0})
+  @prop()
   public commentsCount!: number;
 
 }

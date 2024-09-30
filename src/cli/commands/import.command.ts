@@ -7,7 +7,9 @@ import { DefaultOfferService, OfferModel, OfferService } from '../../shared/modu
 import { DatabaseClient, MongoDatabaseClient } from '../../shared/libs/database-client/index.js';
 import { Logger } from '../../shared/libs/logger/index.js';
 import { ConsoleLogger } from '../../shared/libs/logger/console.logger.js';
-import { DEFAULT_DB_PORT, DEFAULT_USER_PASSWORD } from './command.constant.js';
+
+const DEFAULT_DB_PORT = '27017';
+const DEFAULT_USER_PASSWORD = '123456';
 
 export class ImportCommand implements Command {
   private userService: UserService;

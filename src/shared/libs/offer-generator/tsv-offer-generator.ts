@@ -6,7 +6,6 @@ import {
   generateRandomNumber,
   getRandomItem,
   getRandomItems,
-  getRandomBoolean,
   TAB_SEPARATOR,
   SEMICOLON_SEPARATOR,
 } from '../../helpers/index.js';
@@ -23,8 +22,6 @@ export class TSVOfferGenerator implements OfferGenerator {
     const images = getRandomItems(this.mockData.images, IMAGES_COUNT).join(
       SEMICOLON_SEPARATOR
     );
-    const isPremium = getRandomBoolean();
-    const isFavorite = getRandomBoolean();
     const rating = generateRandomNumber(RATING.MIN, RATING.MAX).toString();
     const rentType = getRandomItem<string>(this.mockData.rentTypes);
     const roomsCount = generateRandomNumber(ROOMS.MIN, ROOMS.MAX).toString();
@@ -51,8 +48,6 @@ export class TSVOfferGenerator implements OfferGenerator {
       city,
       imagePreview,
       images,
-      isPremium,
-      isFavorite,
       rating,
       rentType,
       roomsCount,
