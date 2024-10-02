@@ -57,7 +57,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/token'
-        '401':
+        '400':
           description: Неверные данные для входа
 
     get:
@@ -86,6 +86,50 @@ paths:
           description: Сессия пользователя завершена
         '403':
           description: Сессия пользователя не найдена
+  /users/favorites:
+    post:
+      summary: Добавление предложения в избранное
+      description: Ресурс для добавления предложения в список избранных предложений пользователя.
+      tags:
+        - users
+      parameters:
+        - name: offerId
+          in: query
+          description: ID предложения, которое нужно добавить в избранное
+          required: true
+          schema:
+            type: integer
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Предложение успешно добавлено в избранное
+        '401':
+          description: Пользователь не авторизован
+        '404':
+          description: Предложение не найдено
+
+    delete:
+      summary: Удаление предложения из избранного
+      description: Ресурс для удаления предложения из списка избранных предложений пользователя.
+      tags:
+        - users
+      parameters:
+        - name: offerId
+          in: query
+          description: ID предложения, которое нужно удалить из избранного
+          required: true
+          schema:
+            type: integer
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Предложение успешно удалено из избранного
+        '401':
+          description: Пользователь не авторизован
+        '404':
+          description: Предложение не найдено
 
   /offers:
     post:
@@ -154,10 +198,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/shortOffer'
-        '401':
-          description: Пользователь не авторизован
-        '404':
-          description: Предложения не найдены
+        '400':
+          description: Неверные данные для запроса
 
   /offers/{id}:
     get:
@@ -210,6 +252,8 @@ paths:
           description: Неверные данные для обновления предложения
         '401':
           description: Пользователь не авторизован
+        '403':
+          description: Пользователь не имеет прав для редактирования
         '404':
           description: Предложение не найдено
     delete:
@@ -230,6 +274,8 @@ paths:
           description: Предложение успешно удалено
         '401':
           description: Пользователь не авторизован
+        '403':
+          description: Пользователь не имеет прав для удаления
         '404':
           description: Предложение не найдено
   /offers/{id}/comments:
@@ -285,49 +331,6 @@ paths:
           description: Пользователь не авторизован
         '400':
           description: Неверные данные для добавления комментария
-  /offers/{id}/favorite:
-    post:
-      summary: Добавление предложения в избранное
-      description: Ресурс для добавления предложения в список избранных предложений пользователя.
-      tags:
-        - offers
-      parameters:
-        - name: id
-          in: path
-          description: ID предложения
-          required: true
-          schema:
-            type: integer
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: Предложение успешно добавлено в избранное
-        '401':
-          description: Пользователь не авторизован
-        '404':
-          description: Предложение не найдено
-    delete:
-      summary: Удаление предложения из избранного
-      description: Ресурс для удаления предложения из списка избранных предложений пользователя.
-      tags:
-        - offers
-      parameters:
-        - name: id
-          in: path
-          description: ID предложения
-          required: true
-          schema:
-            type: integer
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: Предложение успешно удалено из избранного
-        '401':
-          description: Пользователь не авторизован
-        '404':
-          description: Предложение не найдено
 
 components:
   securitySchemes:
