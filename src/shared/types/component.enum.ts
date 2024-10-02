@@ -9,4 +9,7 @@ export const Component = {
 
   OfferService: Symbol('OfferService'),
   OfferModel: Symbol('OfferModel'),
+
+  CommentService: Symbol('CommentService'),
+  CommentModel: Symbol('CommentModel'),
 } as const;
