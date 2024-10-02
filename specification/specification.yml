@@ -238,7 +238,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/offer'
+              $ref: '#/components/schemas/updateOffer'
       security:
         - bearerAuth: []
       responses:
@@ -406,6 +406,83 @@ components:
         - email
         - password
         - type
+
+    updateOffer:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Наименование предложения
+          minLength: 10
+          maxLength: 100
+        description:
+          type: string
+          description: Описание предложения
+          minLength: 20
+          maxLength: 1024
+        postDate:
+          type: string
+          format: date
+          description: Дата публикации предложения
+        city:
+          type: string
+          description: Город, в котором находится предложение
+          enum: [Paris, Cologne, Dusseldorf, Amsterdam, Hamburg, Brussels]
+        imagePreview:
+          type: string
+          description: Превью изображения
+        images:
+          type: array
+          items:
+            type: string
+          description: Список фотографий жилья (6 фотографий)
+        rentType:
+          type: string
+          description: Тип жилья
+          enum: [apartment, house, room, hotel]
+        roomsCount:
+          type: integer
+          description: Количество комнат
+          minimum: 1
+          maximum: 8
+        guestsCount:
+          type: integer
+          description: Количество гостей
+          minimum: 1
+          maximum: 10
+        price:
+          type: integer
+          description: Стоимость аренды
+          minimum: 100
+          maximum: 100000
+        amenities:
+          type: array
+          items:
+            type: string
+            enum: [Breakfast, Air conditioning, Laptop friendly workspace, Baby seat, Washer, Towels, Fridge]
+          description: Удобства, доступные в жилье
+        coordinates:
+          type: object
+          properties:
+            latitude:
+              type: number
+            longitude:
+              type: number
+          description: Координаты предложения
+      required:
+        - title
+        - description
+        - postDate
+        - city
+        - imagePreview
+        - images
+        - rentType
+        - roomsCount
+        - guestsCount
+        - price
+        - amenities
+        - author
+        - coordinates
 
     createOffer:
       type: object
