@@ -9,7 +9,7 @@ import {
   TAB_SEPARATOR,
   SEMICOLON_SEPARATOR,
 } from '../../helpers/index.js';
-import { RATING, ROOMS, GUESTS, PRICE, WEEKDAY, IMAGES_COUNT } from './constants.js';
+import { ROOMS, GUESTS, PRICE, WEEKDAY, IMAGES_COUNT } from './constants.js';
 
 export class TSVOfferGenerator implements OfferGenerator {
   constructor(private readonly mockData: MockServerData) {}
@@ -22,7 +22,6 @@ export class TSVOfferGenerator implements OfferGenerator {
     const images = getRandomItems(this.mockData.images, IMAGES_COUNT).join(
       SEMICOLON_SEPARATOR
     );
-    const rating = generateRandomNumber(RATING.MIN, RATING.MAX).toString();
     const rentType = getRandomItem<string>(this.mockData.rentTypes);
     const roomsCount = generateRandomNumber(ROOMS.MIN, ROOMS.MAX).toString();
     const guestsCount = generateRandomNumber(GUESTS.MIN, GUESTS.MAX).toString();
@@ -48,7 +47,6 @@ export class TSVOfferGenerator implements OfferGenerator {
       city,
       imagePreview,
       images,
-      rating,
       rentType,
       roomsCount,
       guestsCount,

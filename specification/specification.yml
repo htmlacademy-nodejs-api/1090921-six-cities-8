@@ -693,14 +693,12 @@ components:
           description: Текст комментария
           minLength: 5
           maxLength: 1024
-        postDate:
-          type: string
-          format: date
-          description: Дата публикации комментария
         rating:
           type: number
           description: Рейтинг комментария
           minimum: 1
           maximum: 5
-        author:
+        userId:
           $ref: '#/components/schemas/user'
+        offerId:
+          $ref: '#/components/schemas/offer'

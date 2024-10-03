@@ -43,9 +43,6 @@ export class OfferEntity extends defaultClasses.TimeStamps {
   @prop({ type: () => [String], required: true })
   public images!: string[];
 
-  @prop({required: true})
-  public rating!: number;
-
   @prop({
     type: () => String,
     enum: RentType,
@@ -74,11 +71,13 @@ export class OfferEntity extends defaultClasses.TimeStamps {
   @prop({ _id: false, required: true })
   public coordinates!: Coordinates;
 
+  // QUESTION: Как сделать так, чтобы это поле не появлялось в дб? Но оно нужно для агрегации
   @prop({
     ref: 'CommentEntity',
     required: true,
     default: [],
-    _id: false
+    _id: false,
+    select: false
   })
   public comments!: Ref<CommentEntity>[];
 
