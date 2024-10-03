@@ -8,6 +8,8 @@ import { OfferEntity } from './offer.entity.js';
 import { CreateOfferDto } from './dto/create-offer.dto.js';
 import { UpdateOfferDto } from './dto/update-offer.dto.js';
 
+const MAX_OFFERS_COUNT = 60;
+
 @injectable()
 export class DefaultOfferService implements OfferService {
   constructor(
@@ -30,7 +32,36 @@ export class DefaultOfferService implements OfferService {
   }
 
   public async find(): Promise<DocumentType<OfferEntity>[]> {
-    return this.offerModel.find().sort({ postDate: SortType.Down }).exec();
+    return this.offerModel
+      .aggregate([
+        {
+          $lookup: {
+            from: 'comments',
+            let: { offerId: '$_id'},
+            pipeline: [
+              { $match: { $expr: { $eq: ['$offerId', '$$offerId'] } } },
+              { $project: { _id: 1, rating: 1}}
+            ],
+            as: 'comments'
+          },
+        },
+        { $addFields:
+            {
+              id: { $toString: '$_id'},
+              commentsCount: { $size: '$comments'},
+              rating: {
+                $cond: {
+                  if: { $gt: [{ $size: '$comments' }, 0] },
+                  then: { $avg: '$comments.rating' },
+                  else: null
+                }
+              }
+            }
+        },
+        { $unset: 'comments' },
+        { $limit: MAX_OFFERS_COUNT },
+        { $sort: { postDate: SortType.Down } }
+      ]).exec();
   }
 
   public async deleteById(offerId: string): Promise<DocumentType<OfferEntity> | null> {

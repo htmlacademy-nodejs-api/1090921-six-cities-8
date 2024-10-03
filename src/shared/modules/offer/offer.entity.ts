@@ -8,6 +8,7 @@ import {
 
 import { City, RentType, Amenity, Coordinates } from '../../types/index.js';
 import { UserEntity } from '../user/index.js';
+import { CommentEntity } from '../comment/comment.entity.js';
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export interface OfferEntity extends defaultClasses.Base {}
@@ -72,6 +73,14 @@ export class OfferEntity extends defaultClasses.TimeStamps {
 
   @prop({ _id: false, required: true })
   public coordinates!: Coordinates;
+
+  @prop({
+    ref: 'CommentEntity',
+    required: true,
+    default: [],
+    _id: false
+  })
+  public comments!: Ref<CommentEntity>[];
 
   @prop()
   public commentsCount!: number;
