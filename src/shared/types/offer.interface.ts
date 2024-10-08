@@ -11,6 +11,7 @@ export interface Offer {
   city: City;
   imagePreview: string;
   images: string[];
+  isPremium: boolean;
   rentType: RentType;
   roomsCount: number;
   guestsCount: number;

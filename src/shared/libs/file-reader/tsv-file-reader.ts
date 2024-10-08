@@ -20,6 +20,7 @@ export class TSVFileReader extends EventEmitter implements FileReader {
       city,
       imagePreview,
       images,
+      isPremium,
       rentType,
       roomsCount,
       guestsCount,
@@ -40,6 +41,7 @@ export class TSVFileReader extends EventEmitter implements FileReader {
       city: city as City,
       imagePreview,
       images: this.parseCollection<string>(images),
+      isPremium: this.parseBoolean(isPremium.toLowerCase()),
       rentType: rentType as RentType,
       roomsCount: this.parseNumber(roomsCount),
       guestsCount: this.parseNumber(guestsCount),
@@ -52,6 +54,10 @@ export class TSVFileReader extends EventEmitter implements FileReader {
 
   private parseNumber(string: string): number {
     return Number.parseInt(string, RADIX);
+  }
+
+  private parseBoolean(boolString: string): boolean {
+    return (/true/).test(boolString);
   }
 
   private parseCollection<T>(string: string, separator?: string): T[] {

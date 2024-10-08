@@ -63,7 +63,7 @@ export class OfferEntity extends defaultClasses.TimeStamps {
   public amenities!: Amenity[];
 
   @prop({
-    ref: () => UserEntity,
+    ref: 'UserEntity',
     required: true
   })
   public author!: Ref<UserEntity>;
@@ -71,7 +71,6 @@ export class OfferEntity extends defaultClasses.TimeStamps {
   @prop({ _id: false, required: true })
   public coordinates!: Coordinates;
 
-  // QUESTION: Как сделать так, чтобы это поле не появлялось в дб? Но оно нужно для агрегации
   @prop({
     ref: 'CommentEntity',
     required: true,
@@ -84,8 +83,8 @@ export class OfferEntity extends defaultClasses.TimeStamps {
   @prop()
   public commentsCount!: number;
 
-  @prop({ required: true, default: false })
-  public isPremium!: boolean;
+  @prop({ default: false })
+  public isPremium: boolean;
 }
 
 export const OfferModel = getModelForClass(OfferEntity);
