@@ -8,9 +8,8 @@ export class PinoLogger implements Logger {
   private readonly logger: PinoInstance;
 
   constructor() {
-    const modulePath = resolve();
     const logFilePath = 'logs/rest.log';
-    const destination = resolve(modulePath, '../../../', logFilePath);
+    const destination = resolve(logFilePath);
 
     const multiTransport = transport({
       targets: [

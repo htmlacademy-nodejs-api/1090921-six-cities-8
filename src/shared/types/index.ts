@@ -7,3 +7,4 @@ export { User } from './user.interface.js';
 export { UserType } from './user-type.enum.js';
 export { MockServerData } from './mock-server-data.interface.js';
 export { Component } from './component.enum.js';
+export { SortType } from './sort-type.enum.js';
