@@ -1,9 +1,9 @@
 import { City, RentType, Amenity } from '../../../types/index.js';
 
-export class UpdateOfferDto {
+export class UpdateOfferDTO {
   public title?: string;
   public description?: string;
-  public postDate?: Date;
+  public postDate?: string;
   public city?: City;
   public imagePreview?: string;
   public images?: string[];
@@ -12,8 +12,8 @@ export class UpdateOfferDto {
   public guestsCount?: number;
   public price?: number;
   public amenities?: Amenity[];
-  public coordinates?: {
+  public coordinates?: Partial<{
     latitude: number;
     longitude: number;
-  };
+  }>;
 }

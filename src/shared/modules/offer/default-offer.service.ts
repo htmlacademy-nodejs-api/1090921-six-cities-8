@@ -1,16 +1,14 @@
 import { inject, injectable } from 'inversify';
 import { DocumentType, types } from '@typegoose/typegoose';
-import { Types } from 'mongoose';
 
 import { OfferService } from './offer-service.interface.js';
-import { City, Component, SortType } from '../../types/index.js';
+import { City, Component } from '../../types/index.js';
 import { Logger } from '../../libs/logger/index.js';
 import { OfferEntity } from './offer.entity.js';
-import { CreateOfferDto } from './dto/create-offer.dto.js';
-import { UpdateOfferDto } from './dto/update-offer.dto.js';
-
-const MAX_OFFERS_COUNT = 60;
-const PREMIUM_OFFERS_LIMIT = 3;
+import { CreateOfferDTO } from './dto/create-offer.dto.js';
+import { UpdateOfferDTO } from './dto/update-offer.dto.js';
+import { PREMIUM_OFFERS_LIMIT } from './offer.constants.js';
+import { findOfferByIdAggregation, findOffersAggregation } from './offer.aggregation.js';
 
 @injectable()
 export class DefaultOfferService implements OfferService {
@@ -20,7 +18,7 @@ export class DefaultOfferService implements OfferService {
     private readonly offerModel: types.ModelType<OfferEntity>
   ) {}
 
-  public async create(dto: CreateOfferDto): Promise<DocumentType<OfferEntity>> {
+  public async create(dto: CreateOfferDTO): Promise<DocumentType<OfferEntity>> {
     const result = await this.offerModel.create(dto);
     this.logger.info(`New offer created: ${dto.title}`);
 
@@ -31,62 +29,7 @@ export class DefaultOfferService implements OfferService {
     offerId: string,
     userId?: string
   ): Promise<DocumentType<OfferEntity> | null> {
-    const pipeline = [
-      { $match: { _id: new Types.ObjectId(offerId) } },
-      {
-        $lookup: {
-          from: 'comments',
-          let: { offerId: '$_id' },
-          pipeline: [
-            { $match: { $expr: { $eq: ['$offerId', '$$offerId'] } } },
-            { $project: { _id: 1, rating: 1 } }
-          ],
-          as: 'comments'
-        },
-      },
-      userId ? {
-        $lookup: {
-          from: 'users',
-          let: { offerId: '$_id' },
-          pipeline: [
-            { $match: { _id: new Types.ObjectId(userId) } },
-            { $project: { favorites: 1 } },
-            { $unwind: '$favorites' },
-            { $match: { $expr: { $eq: ['$$offerId', '$favorites'] } } }
-          ],
-          as: 'isFavoriteArray'
-        }
-      } : {
-        $addFields: {
-          isFavoriteArray: []
-        }
-      },
-      {
-        $lookup: {
-          from: 'users',
-          localField: 'author',
-          foreignField: '_id',
-          as: 'author'
-        }
-      },
-      { $unwind: '$author' },
-      {
-        $addFields: {
-          id: { $toString: '$_id' },
-          commentsCount: { $size: '$comments' },
-          rating: {
-            $cond: {
-              if: { $gt: [{ $size: '$comments' }, 0] },
-              then: { $avg: '$comments.rating' },
-              else: null,
-            },
-          },
-          isFavorite: { $gt: [{ $size: '$isFavoriteArray' }, 0] }
-        },
-      },
-      { $unset: ['comments', 'isFavoriteArray'] },
-      { $limit: 1 },
-    ];
+    const pipeline = findOfferByIdAggregation(offerId, userId);
     const result = await this.offerModel
       .aggregate(pipeline)
       .exec();
@@ -95,62 +38,7 @@ export class DefaultOfferService implements OfferService {
   }
 
   public async find(userId?: string): Promise<DocumentType<OfferEntity>[]> {
-    const pipeline = [
-      {
-        $lookup: {
-          from: 'comments',
-          let: { offerId: '$_id' },
-          pipeline: [
-            { $match: { $expr: { $eq: ['$offerId', '$$offerId'] } } },
-            { $project: { _id: 1, rating: 1 } },
-          ],
-          as: 'comments',
-        },
-      },
-      userId ? {
-        $lookup: {
-          from: 'users',
-          let: { offerId: '$_id' },
-          pipeline: [
-            { $match: { _id: new Types.ObjectId(userId) } },
-            { $project: { favorites: 1 } },
-            { $unwind: '$favorites' },
-            { $match: { $expr: { $eq: ['$$offerId', '$favorites'] } } }
-          ],
-          as: 'isFavoriteArray'
-        }
-      } : {
-        $addFields: {
-          isFavoriteArray: []
-        }
-      },
-      {
-        $lookup: {
-          from: 'users',
-          localField: 'author',
-          foreignField: '_id',
-          as: 'author'
-        }
-      },
-      { $unwind: '$author' },
-      {
-        $addFields: {
-          id: { $toString: '$_id' },
-          commentsCount: { $size: '$comments' },
-          rating: {
-            $cond: {
-              if: { $gt: [{ $size: '$comments' }, 0] },
-              then: { $avg: '$comments.rating' },
-              else: null,
-            },
-          },
-          isFavorite: { $gt: [{ $size: '$isFavoriteArray' }, 0] }
-        },
-      },
-      { $unset: ['comments', 'isFavoriteArray'] },
-      { $limit: MAX_OFFERS_COUNT },
-      { $sort: { postDate: SortType.Down } },
-    ];
+    const pipeline = findOffersAggregation(userId);
     return this.offerModel
       .aggregate(pipeline)
       .exec();
@@ -176,7 +64,7 @@ export class DefaultOfferService implements OfferService {
 
   public async updateById(
     offerId: string,
-    dto: UpdateOfferDto
+    dto: UpdateOfferDTO
   ): Promise<DocumentType<OfferEntity> | null> {
     return this.offerModel
       .findByIdAndUpdate(offerId, dto, { new: true })
@@ -185,7 +73,7 @@ export class DefaultOfferService implements OfferService {
   }
 
   public async exists(documentId: string): Promise<boolean> {
-    return (await this.offerModel.exists({ _id: documentId })) !== null;
+    return this.offerModel.exists({ _id: documentId }).then((r) => !!r);
   }
 
   public async incCommentCount(
