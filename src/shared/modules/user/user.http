@@ -1,0 +1,27 @@
+# Пользователи
+## Создать нового пользователя
+
+POST http://localhost:5000/users/register HTTP/1.1
+Content-Type: application/json
+
+{
+  "email": "test@overlook.net",
+  "avatar": "test.png",
+  "name": "Jack Test",
+  "password": "test",
+  "type": "обычный"
+}
+
+###
+
+## Авторизовать пользователя
+
+POST http://localhost:5000/users/login HTTP/1.1
+Content-Type: application/json
+
+{
+  "email": "test@overlook.net",
+  "password": "test"
+}
+
+###
