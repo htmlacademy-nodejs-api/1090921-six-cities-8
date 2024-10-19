@@ -98,17 +98,17 @@ export class UserController extends BaseController {
     const validatedUserId = userId.toString();
     const validatedOfferId = offerId.toString();
 
-    const updatedUser = await this.userService.addFavoriteOffer(validatedUserId, validatedOfferId);
-
-    if (!updatedUser) {
+    const userExists = await this.userService.findById(validatedUserId);
+    if (!userExists) {
       throw new HttpError(
         StatusCodes.NOT_FOUND,
-        'User or offer not found',
+        'User not found',
         'UserController'
       );
-    } else {
-      this.ok(res, fillDTO(UserFavoritesRDO, updatedUser));
     }
+
+    const updatedUser = await this.userService.addFavoriteOffer(validatedUserId, validatedOfferId);
+    this.ok(res, fillDTO(UserFavoritesRDO, updatedUser));
   }
 
   public async deleteOfferFromFavorites(req: Request, res: Response) {
@@ -127,17 +127,17 @@ export class UserController extends BaseController {
     const validatedUserId = userId.toString();
     const validatedOfferId = offerId.toString();
 
-    const updatedUser = await this.userService.removeFavoriteOffer(validatedUserId, validatedOfferId);
-
-    if (!updatedUser) {
+    const userExists = await this.userService.findById(validatedUserId);
+    if (!userExists) {
       throw new HttpError(
         StatusCodes.NOT_FOUND,
-        'User or offer not found',
+        'User not found',
         'UserController'
       );
-    } else {
-      this.ok(res, fillDTO(UserFavoritesRDO, updatedUser));
     }
+
+    const updatedUser = await this.userService.removeFavoriteOffer(validatedUserId, validatedOfferId);
+    this.ok(res, fillDTO(UserFavoritesRDO, updatedUser));
   }
 
   public async getFavoriteOffers(req: Request, res: Response) {
