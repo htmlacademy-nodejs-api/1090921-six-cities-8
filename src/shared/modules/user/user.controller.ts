@@ -1,5 +1,5 @@
 import { inject, injectable } from 'inversify';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
 import { BaseController, HttpError, HttpMethod } from '../../libs/rest/index.js';
@@ -10,7 +10,9 @@ import { CreateUserRequest } from './create-user-request.type.js';
 import { UserService } from './user-service.interface.js';
 import { Config, RestSchema } from '../../libs/config/index.js';
 import { fillDTO } from '../../helpers/index.js';
-import { UserRdo } from './rdo/user.rdo.js';
+import { UserRDO } from './rdo/user.rdo.js';
+import { UserFavoritesRDO } from './rdo/user-favorites.rdo.js';
+import { ShortOfferRDO } from '../offer/rdo/short-offer.rdo.js';
 
 @injectable()
 export class UserController extends BaseController {
@@ -24,6 +26,10 @@ export class UserController extends BaseController {
 
     this.addRoute({ path: '/register', method: HttpMethod.Post, handler: this.create });
     this.addRoute({ path: '/login', method: HttpMethod.Post, handler: this.login });
+    this.addRoute({ path: '/login', method: HttpMethod.Get, handler: this.checkAuthenticate });
+    this.addRoute({ path: '/favorites', method: HttpMethod.Post, handler: this.addOfferToFavorites });
+    this.addRoute({ path: '/favorites', method: HttpMethod.Delete, handler: this.deleteOfferFromFavorites });
+    this.addRoute({ path: '/favorites', method: HttpMethod.Get, handler: this.getFavoriteOffers });
   }
 
   public async create(
@@ -32,6 +38,7 @@ export class UserController extends BaseController {
   ): Promise<void> {
     const userExists = await this.userService.findByEmail(body.email);
 
+    // TODO: Добавить обработку статуса 400 BAD_REQUEST
     if (userExists) {
       throw new HttpError(
         StatusCodes.CONFLICT,
@@ -41,7 +48,7 @@ export class UserController extends BaseController {
     }
 
     const result = await this.userService.create(body, this.configService.get('SALT'));
-    this.created(res, fillDTO(UserRdo, result));
+    this.created(res, fillDTO(UserRDO, result));
   }
 
   public async login(
@@ -58,10 +65,106 @@ export class UserController extends BaseController {
       );
     }
 
+    // TODO: Добавить обработку статусов 200 и 400 BAD_REQUEST
     throw new HttpError(
       StatusCodes.NOT_IMPLEMENTED,
       'Not implemented',
       'UserController',
     );
+  }
+
+  public async checkAuthenticate() {
+    // TODO: Добавить обработку статусов 200 и 401 NOT_AUTHORIZED
+    throw new HttpError(
+      StatusCodes.NOT_IMPLEMENTED,
+      'Not implemented',
+      'UserController',
+    );
+  }
+
+  public async addOfferToFavorites(req: Request, res: Response) {
+    const { userId, offerId } = req.query;
+
+    if (!userId || !offerId) {
+      throw new HttpError(
+        StatusCodes.BAD_REQUEST,
+        'Please provide userId and offerId',
+        'UserController',
+      );
+    }
+
+    // TODO: добавить обработку статуса 401 NOT_AUTHORIZED, доработать 400 BAD_REQUEST после валидации
+    // TODO: добавить корректную валидацию данных из query
+    const validatedUserId = userId.toString();
+    const validatedOfferId = offerId.toString();
+
+    const updatedUser = await this.userService.addFavoriteOffer(validatedUserId, validatedOfferId);
+
+    if (!updatedUser) {
+      throw new HttpError(
+        StatusCodes.NOT_FOUND,
+        'User or offer not found',
+        'UserController'
+      );
+    } else {
+      this.ok(res, fillDTO(UserFavoritesRDO, updatedUser));
+    }
+  }
+
+  public async deleteOfferFromFavorites(req: Request, res: Response) {
+    const { userId, offerId } = req.query;
+
+    if (!userId || !offerId) {
+      throw new HttpError(
+        StatusCodes.BAD_REQUEST,
+        'Please provide userId and offerId',
+        'UserController',
+      );
+    }
+
+    // TODO: добавить обработку статуса 401 NOT_AUTHORIZED, доработать 400 BAD_REQUEST после валидации
+    // TODO: добавить корректную валидацию данных из query
+    const validatedUserId = userId.toString();
+    const validatedOfferId = offerId.toString();
+
+    const updatedUser = await this.userService.removeFavoriteOffer(validatedUserId, validatedOfferId);
+
+    if (!updatedUser) {
+      throw new HttpError(
+        StatusCodes.NOT_FOUND,
+        'User or offer not found',
+        'UserController'
+      );
+    } else {
+      this.ok(res, fillDTO(UserFavoritesRDO, updatedUser));
+    }
+  }
+
+  public async getFavoriteOffers(req: Request, res: Response) {
+    const { userId } = req.query;
+
+    if (!userId) {
+      throw new HttpError(
+        StatusCodes.BAD_REQUEST,
+        'Please provide userId',
+        'UserController',
+      );
+    }
+
+    // TODO: добавить обработку статуса 401 NOT_AUTHORIZED, доработать 400 BAD_REQUEST после валидации
+    // TODO: добавить корректную валидацию данных из query
+    const validatedUserId = userId.toString();
+
+    const userExists = await this.userService.findById(validatedUserId);
+    if (!userExists) {
+      throw new HttpError(
+        StatusCodes.NOT_FOUND,
+        'User not found',
+        'UserController'
+      );
+    }
+
+    const favoriteOffers = await this.userService.findUserFavorites(validatedUserId);
+    this.ok(res, fillDTO(ShortOfferRDO, favoriteOffers));
   }
 }

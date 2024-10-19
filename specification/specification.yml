@@ -35,6 +35,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/user'
+        '400':
+          description: Некорректные данные для создания пользователя
         '409':
           description: Пользователь с таким email уже существует.
 
@@ -73,19 +75,6 @@ paths:
         '401':
           description: Пользователь не авторизован
 
-  /users/logout:
-    post:
-      tags:
-        - users
-      summary: Выход из закрытой части приложения
-      description: Выход пользователя из системы
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: Сессия пользователя завершена
-        '403':
-          description: Сессия пользователя не найдена
   /users/favorites:
     post:
       summary: Добавление предложения в избранное
@@ -93,12 +82,18 @@ paths:
       tags:
         - users
       parameters:
+        - name: userId
+          in: query
+          description: ID пользователя
+          required: true
+          schema:
+            type: string
         - name: offerId
           in: query
           description: ID предложения, которое нужно добавить в избранное
           required: true
           schema:
-            type: integer
+            type: string
       security:
         - bearerAuth: []
       responses:
@@ -115,12 +110,18 @@ paths:
       tags:
         - users
       parameters:
+        - name: userId
+          in: query
+          description: ID пользователя
+          required: true
+          schema:
+            type: string
         - name: offerId
           in: query
           description: ID предложения, которое нужно удалить из избранного
           required: true
           schema:
-            type: integer
+            type: string
       security:
         - bearerAuth: []
       responses:
@@ -130,6 +131,36 @@ paths:
           description: Пользователь не авторизован
         '404':
           description: Предложение не найдено
+
+    get:
+      summary: Получение списка избранных предложений пользователя
+      description: Ресурс для получения списка избранных предложений пользователя.
+      tags:
+        - users
+      parameters:
+        - name: userId
+          in: query
+          description: ID пользователя
+          required: true
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Список предложений
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/shortOffer'
+        '400':
+          description: Некорректные данные для запроса
+        '401':
+          description: Пользователь не авторизован
+        '404':
+          description: Пользователь не найден
 
   /offers:
     post:
@@ -180,12 +211,6 @@ paths:
       - name: is_premium
         in: query
         description: Фильтр для получения только премиальных предложений (true для премиальных, обязательно указать город)
-        required: false
-        schema:
-          type: boolean
-      - name: is_favorite
-        in: query
-        description: Фильтр для получения только избранных предложений (true для избранных, только для авторизованных клиентов)
         required: false
         schema:
           type: boolean

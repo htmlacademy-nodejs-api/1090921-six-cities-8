@@ -8,6 +8,7 @@ import { OfferEntity } from '../offer/index.js';
 export interface UserService {
   create(dto: CreateUserDTO, salt: string): Promise<DocumentType<UserEntity>>;
   findByEmail(email: string): Promise<DocumentType<UserEntity> | null>;
+  findById(userId: string): Promise<DocumentType<UserEntity> | null>;
   findOrCreate(dto: CreateUserDTO, salt: string): Promise<DocumentType<UserEntity>>;
   findUserFavorites(userId: string): Promise<DocumentType<OfferEntity>[]>;
   addFavoriteOffer(userId: string, offerId: string): Promise<DocumentType<UserEntity> | null>;
