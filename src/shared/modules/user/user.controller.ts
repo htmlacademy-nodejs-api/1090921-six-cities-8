@@ -46,7 +46,7 @@ export class UserController extends BaseController {
 
   public async login(
     { body }: LoginUserRequest,
-    _res: Response,
+    _: Response,
   ): Promise<void> {
     const userExists = await this.userService.findByEmail(body.email);
 
