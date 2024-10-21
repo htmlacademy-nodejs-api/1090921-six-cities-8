@@ -8,13 +8,13 @@ import { Logger } from '../../libs/logger/index.js';
 import { City, Component } from '../../types/index.js';
 import { OfferService } from './offer-service.interface.js';
 import { fillDTO, RADIX } from '../../helpers/index.js';
-import { CreateOfferRequest } from './create-offer-request.type.js';
-import { UpdateOfferRequest } from './update-offer-request.type.js';
 import { FullOfferRDO } from './rdo/full-offer.rdo.js';
 import { ShortOfferRDO } from './rdo/short-offer.rdo.js';
 import { MAX_OFFERS_COUNT } from './offer.constants.js';
-import { RequestQuery } from './type/request-query.type.js';
-import { ParamOfferId } from './type/params-offerId.type.js';
+import type { RequestQuery } from './type/request-query.type.js';
+import type { ParamOfferId } from './type/params-offer-id.type.js';
+import type { CreateOfferRequest } from './type/create-offer-request.type.js';
+import type { UpdateOfferRequest } from './type/update-offer-request.type.js';
 
 @injectable()
 export class OfferController extends BaseController {

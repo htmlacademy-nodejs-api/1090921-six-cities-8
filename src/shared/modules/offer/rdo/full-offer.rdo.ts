@@ -1,9 +1,9 @@
-import { Expose } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
 import { City } from '../../../types/city.enum.js';
 import { RentType } from '../../../types/rent-type.enum.js';
 import { Amenity } from '../../../types/amenity.enum.js';
-import { User } from '../../../types/user.interface.js';
 import { Coordinates } from '../../../types/coordinates.interface.js';
+import { UserRDO } from '../../user/rdo/user.rdo.js';
 
 export class FullOfferRDO {
   @Expose()
@@ -45,9 +45,9 @@ export class FullOfferRDO {
   @Expose()
   public amenities: Amenity[];
 
-  // QUESTION: как корректно добавить объект автора в RDO?
   @Expose()
-  public author: User;
+  @Type(() => UserRDO)
+  public author: UserRDO;
 
   @Expose()
   public coordinates: Coordinates;
