@@ -1,5 +1,6 @@
 import { inject, injectable } from 'inversify';
 import { Request, Response } from 'express';
+import { ParamsDictionary } from 'express-serve-static-core';
 import { StatusCodes } from 'http-status-codes';
 
 import { BaseController, HttpError, HttpMethod } from '../../libs/rest/index.js';
@@ -12,6 +13,8 @@ import { UpdateOfferRequest } from './update-offer-request.type.js';
 import { FullOfferRDO } from './rdo/full-offer.rdo.js';
 import { ShortOfferRDO } from './rdo/short-offer.rdo.js';
 import { MAX_OFFERS_COUNT } from './offer.constants.js';
+import { RequestQuery } from './type/request-query.type.js';
+import { ParamOfferId } from './type/params-offerId.type.js';
 
 @injectable()
 export class OfferController extends BaseController {
@@ -23,10 +26,10 @@ export class OfferController extends BaseController {
     this.logger.info('Register routes for UserController…');
 
     this.addRoute({ path: '/', method: HttpMethod.Post, handler: this.create });
-    this.addRoute({ path: '/', method: HttpMethod.Get, handler: this.getOffers });
-    this.addRoute({ path: '/:id', method: HttpMethod.Get, handler: this.getOffer });
-    this.addRoute({ path: '/:id', method: HttpMethod.Put, handler: this.updateOffer });
-    this.addRoute({ path: '/:id', method: HttpMethod.Delete, handler: this.deleteOffer });
+    this.addRoute({ path: '/', method: HttpMethod.Get, handler: this.index });
+    this.addRoute({ path: '/:offerId', method: HttpMethod.Get, handler: this.show });
+    this.addRoute({ path: '/:offerId', method: HttpMethod.Patch, handler: this.update });
+    this.addRoute({ path: '/:offerId', method: HttpMethod.Delete, handler: this.delete });
   }
 
   public async create({ body }: CreateOfferRequest, res: Response): Promise<void> {
@@ -35,10 +38,10 @@ export class OfferController extends BaseController {
     this.created(res, fillDTO(FullOfferRDO, result));
   }
 
-  public async getOffers(req: Request, res: Response) {
+  public async index(req: Request<ParamsDictionary, unknown, unknown, RequestQuery>, res: Response) {
     const { limit, city, is_premium: isPremium } = req.query;
 
-    if (isPremium || city) {
+    if (isPremium && city) {
       await this.getPremiumOffers(req, res);
       return;
     }
@@ -59,7 +62,7 @@ export class OfferController extends BaseController {
     this.ok(res, fillDTO(ShortOfferRDO, offers));
   }
 
-  public async getPremiumOffers(req: Request, res: Response) {
+  private async getPremiumOffers(req: Request<ParamsDictionary, unknown, unknown, RequestQuery>, res: Response) {
     const { city } = req.query;
 
     if (!city) {
@@ -77,10 +80,10 @@ export class OfferController extends BaseController {
     this.ok(res, fillDTO(ShortOfferRDO, premiumOffers));
   }
 
-  public async getOffer(req: Request, res: Response) {
-    const { id } = req.params;
+  public async show(req: Request<ParamOfferId>, res: Response) {
+    const { offerId } = req.params;
 
-    const offer = await this.offerService.findById(id);
+    const offer = await this.offerService.findById(offerId);
     if (!offer) {
       throw new HttpError(
         StatusCodes.NOT_FOUND,
@@ -92,11 +95,11 @@ export class OfferController extends BaseController {
     this.ok(res, fillDTO(FullOfferRDO, offer));
   }
 
-  public async updateOffer(req: UpdateOfferRequest, res: Response) {
-    const { id } = req.params;
+  public async update(req: UpdateOfferRequest, res: Response) {
+    const { offerId } = req.params;
 
     // TODO: добавить валидацию и обработку статусов 400, 401, 403
-    const offer = await this.offerService.findById(id);
+    const offer = await this.offerService.findById(offerId);
     if (!offer) {
       throw new HttpError(
         StatusCodes.NOT_FOUND,
@@ -105,15 +108,15 @@ export class OfferController extends BaseController {
       );
     }
 
-    const updatedOffer = await this.offerService.updateById(id, req.body);
+    const updatedOffer = await this.offerService.updateById(offerId, req.body);
     this.ok(res, fillDTO(FullOfferRDO, updatedOffer));
   }
 
-  public async deleteOffer(req: Request, res: Response) {
-    const { id } = req.params;
+  public async delete(req: Request<ParamOfferId>, res: Response) {
+    const { offerId } = req.params;
 
     // TODO: добавить валидацию и обработку статусов 401, 403
-    const offer = await this.offerService.findById(id);
+    const offer = await this.offerService.findById(offerId);
     if (!offer) {
       throw new HttpError(
         StatusCodes.NOT_FOUND,
@@ -122,7 +125,7 @@ export class OfferController extends BaseController {
       );
     }
 
-    const deletedOffer = await this.offerService.deleteById(id);
+    const deletedOffer = await this.offerService.deleteById(offerId);
     this.noContent(res, fillDTO(FullOfferRDO, deletedOffer));
   }
 }

@@ -75,7 +75,7 @@ paths:
         '401':
           description: Пользователь не авторизован
 
-  /users/favorites:
+  /users/{userId}/favorites:
     post:
       summary: Добавление предложения в избранное
       description: Ресурс для добавления предложения в список избранных предложений пользователя.
@@ -83,7 +83,7 @@ paths:
         - users
       parameters:
         - name: userId
-          in: query
+          in: path
           description: ID пользователя
           required: true
           schema:
@@ -111,7 +111,7 @@ paths:
         - users
       parameters:
         - name: userId
-          in: query
+          in: path
           description: ID пользователя
           required: true
           schema:
@@ -139,7 +139,7 @@ paths:
         - users
       parameters:
         - name: userId
-          in: query
+          in: path
           description: ID пользователя
           required: true
           schema:
@@ -226,14 +226,14 @@ paths:
         '400':
           description: Неверные данные для запроса
 
-  /offers/{id}:
+  /offers/{offerId}:
     get:
       summary: Получение детальной информации о предложении
       description: Получение полной информации по конкретному предложению
       tags:
         - offers
       parameters:
-        - name: id
+        - name: offerId
           in: path
           required: true
           schema:
@@ -247,13 +247,13 @@ paths:
                 $ref: '#/components/schemas/offer'
         '404':
           description: Предложение не найдено
-    put:
+    patch:
       summary: Редактирование предложения
       description: Изменение данных существующего предложения
       tags:
         - offers
       parameters:
-        - name: id
+        - name: offerId
           in: path
           required: true
           schema:
@@ -287,7 +287,7 @@ paths:
       tags:
         - offers
       parameters:
-        - name: id
+        - name: offerId
           in: path
           required: true
           schema:
@@ -303,14 +303,14 @@ paths:
           description: Пользователь не имеет прав для удаления
         '404':
           description: Предложение не найдено
-  /offers/{id}/comments:
+  /offers/{offerId}/comments:
     get:
       summary: Получение списка комментариев для предложения
       description: Получение всех комментариев, связанных с предложением
       tags:
         - comments
       parameters:
-        - name: id
+        - name: offerId
           in: path
           required: true
           schema:
@@ -332,7 +332,7 @@ paths:
       tags:
         - comments
       parameters:
-        - name: id
+        - name: offerId
           in: path
           required: true
           schema:

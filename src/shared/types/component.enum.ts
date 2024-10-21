@@ -16,4 +16,5 @@ export const Component = {
   ExceptionFilter: Symbol('ExceptionFilter'),
 
   UserController: Symbol('UserController'),
+  OfferController: Symbol('OfferController'),
 } as const;

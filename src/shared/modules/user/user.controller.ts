@@ -13,6 +13,8 @@ import { fillDTO } from '../../helpers/index.js';
 import { UserRDO } from './rdo/user.rdo.js';
 import { UserFavoritesRDO } from './rdo/user-favorites.rdo.js';
 import { ShortOfferRDO } from '../offer/rdo/short-offer.rdo.js';
+import type { ParamUserId } from './type/param-userid.type.js';
+import type { RequestQuery } from './type/request-query.type.js';
 
 @injectable()
 export class UserController extends BaseController {
@@ -27,9 +29,9 @@ export class UserController extends BaseController {
     this.addRoute({ path: '/register', method: HttpMethod.Post, handler: this.create });
     this.addRoute({ path: '/login', method: HttpMethod.Post, handler: this.login });
     this.addRoute({ path: '/login', method: HttpMethod.Get, handler: this.checkAuthenticate });
-    this.addRoute({ path: '/favorites', method: HttpMethod.Post, handler: this.addOfferToFavorites });
-    this.addRoute({ path: '/favorites', method: HttpMethod.Delete, handler: this.deleteOfferFromFavorites });
-    this.addRoute({ path: '/favorites', method: HttpMethod.Get, handler: this.getFavoriteOffers });
+    this.addRoute({ path: '/:userId/favorites', method: HttpMethod.Post, handler: this.addOfferToFavorites });
+    this.addRoute({ path: '/:userId/favorites', method: HttpMethod.Delete, handler: this.deleteOfferFromFavorites });
+    this.addRoute({ path: '/:userId/favorites', method: HttpMethod.Get, handler: this.getFavoriteOffers });
   }
 
   public async create(
@@ -82,8 +84,9 @@ export class UserController extends BaseController {
     );
   }
 
-  public async addOfferToFavorites(req: Request, res: Response) {
-    const { userId, offerId } = req.query;
+  public async addOfferToFavorites(req: Request<ParamUserId, unknown, unknown, RequestQuery>, res: Response) {
+    const { userId } = req.params;
+    const { offerId } = req.query;
 
     if (!userId || !offerId) {
       throw new HttpError(
@@ -111,8 +114,9 @@ export class UserController extends BaseController {
     this.ok(res, fillDTO(UserFavoritesRDO, updatedUser));
   }
 
-  public async deleteOfferFromFavorites(req: Request, res: Response) {
-    const { userId, offerId } = req.query;
+  public async deleteOfferFromFavorites(req: Request<ParamUserId, unknown, unknown, RequestQuery>, res: Response) {
+    const { userId } = req.params;
+    const { offerId } = req.query;
 
     if (!userId || !offerId) {
       throw new HttpError(
@@ -140,8 +144,8 @@ export class UserController extends BaseController {
     this.ok(res, fillDTO(UserFavoritesRDO, updatedUser));
   }
 
-  public async getFavoriteOffers(req: Request, res: Response) {
-    const { userId } = req.query;
+  public async getFavoriteOffers(req: Request<ParamUserId>, res: Response) {
+    const { userId } = req.params;
 
     if (!userId) {
       throw new HttpError(
