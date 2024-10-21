@@ -3,6 +3,8 @@ export {
   getRandomBoolean,
   getRandomItems,
   getRandomItem,
+  fillDTO,
+  createErrorObject,
 } from './common.js';
 
 export {

@@ -27,9 +27,8 @@ export class DefaultOfferService implements OfferService {
 
   public async findById(
     offerId: string,
-    userId?: string
   ): Promise<DocumentType<OfferEntity> | null> {
-    const pipeline = findOfferByIdAggregation(offerId, userId);
+    const pipeline = findOfferByIdAggregation(offerId);
     const result = await this.offerModel
       .aggregate(pipeline)
       .exec();
@@ -37,8 +36,8 @@ export class DefaultOfferService implements OfferService {
     return result[0] || null;
   }
 
-  public async find(userId?: string): Promise<DocumentType<OfferEntity>[]> {
-    const pipeline = findOffersAggregation(userId);
+  public async find(limit?: number): Promise<DocumentType<OfferEntity>[]> {
+    const pipeline = findOffersAggregation(limit);
     return this.offerModel
       .aggregate(pipeline)
       .exec();

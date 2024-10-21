@@ -31,82 +31,35 @@ const addRating = {
     else: null,
   },
 };
-const addIsFavorite = { $gt: [{ $size: '$isFavoriteArray' }, 0] };
 
-export const findOfferByIdAggregation = (offerId: string, userId?: string) => {
-  const lookupFromUsers = userId
-    ? {
-      $lookup: {
-        from: 'users',
-        let: { offerId: '$_id' },
-        pipeline: [
-          { $match: { _id: new Types.ObjectId(userId) } },
-          { $project: { favorites: 1 } },
-          { $unwind: '$favorites' },
-          { $match: { $expr: { $eq: ['$$offerId', '$favorites'] } } },
-        ],
-        as: 'isFavoriteArray',
-      },
-    }
-    : {
-      $addFields: {
-        isFavoriteArray: [],
-      },
-    };
-  return [
-    { $match: { _id: new Types.ObjectId(offerId) } },
-    lookupFromComments,
-    lookupFromUsers,
-    populateAuthor,
-    unwindAuthor,
-    {
-      $addFields: {
-        id: addId,
-        commentsCount: addCommentsCount,
-        rating: addRating,
-        isFavorite: addIsFavorite,
-      },
+export const findOfferByIdAggregation = (offerId: string) => [
+  { $match: { _id: new Types.ObjectId(offerId) } },
+  lookupFromComments,
+  populateAuthor,
+  unwindAuthor,
+  {
+    $addFields: {
+      id: addId,
+      commentsCount: addCommentsCount,
+      rating: addRating,
     },
-    { $unset: ['comments', 'isFavoriteArray'] },
-    { $limit: 1 },
-  ];
-};
+  },
+  { $unset: ['comments'] },
+  { $limit: 1 },
+];
 
-export const findOffersAggregation = (userId?: string) => {
-  const lookupFromUsers = userId
-    ? {
-      $lookup: {
-        from: 'users',
-        let: { offerId: '$_id' },
-        pipeline: [
-          { $match: { _id: new Types.ObjectId(userId) } },
-          { $project: { favorites: 1 } },
-          { $unwind: '$favorites' },
-          { $match: { $expr: { $eq: ['$$offerId', '$favorites'] } } },
-        ],
-        as: 'isFavoriteArray',
-      },
-    }
-    : {
-      $addFields: {
-        isFavoriteArray: [],
-      },
-    };
-  return [
-    lookupFromComments,
-    lookupFromUsers,
-    populateAuthor,
-    unwindAuthor,
-    {
-      $addFields: {
-        id: addId,
-        commentsCount: { $size: '$comments' },
-        rating: addRating,
-        isFavorite: addIsFavorite,
-      },
+export const findOffersAggregation = (limit?: number) => [
+  lookupFromComments,
+  populateAuthor,
+  unwindAuthor,
+  {
+    $addFields: {
+      id: addId,
+      commentsCount: { $size: '$comments' },
+      rating: addRating,
     },
-    { $unset: ['comments', 'isFavoriteArray'] },
-    { $limit: MAX_OFFERS_COUNT },
-    { $sort: { postDate: SortType.Down } },
-  ];
-};
+  },
+  { $unset: ['comments'] },
+  { $limit: limit || MAX_OFFERS_COUNT },
+  { $sort: { postDate: SortType.Down } },
+];
