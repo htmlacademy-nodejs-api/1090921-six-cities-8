@@ -1,5 +1,5 @@
 import { inject, injectable } from 'inversify';
-import express, { Express } from 'express';
+import express from 'express';
 
 import { Logger } from '../shared/libs/logger/index.js';
 import { Config, RestSchema } from '../shared/libs/config/index.js';
@@ -10,7 +10,7 @@ import { Controller, ExceptionFilter } from '../shared/libs/rest/index.js';
 
 @injectable()
 export class RestApplication {
-  private readonly server: Express;
+  private readonly server = express();
 
   constructor(
     @inject(Component.Logger) private readonly logger: Logger,
@@ -20,7 +20,6 @@ export class RestApplication {
     @inject(Component.UserController) private readonly userController: Controller,
     @inject(Component.OfferController) private readonly offerController: Controller,
   ) {
-    this.server = express();
   }
 
   private async initDb() {

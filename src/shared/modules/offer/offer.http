@@ -1,5 +1,5 @@
 # Получить объявление по идентификатору
-GET http://localhost:5000/offers/67056f6fc82961263a52dee2 HTTP/1.1
+GET http://localhost:5000/offers/671a7961490d9cf38a0f8160 HTTP/1.1
 
 ###
 
@@ -19,9 +19,9 @@ POST http://localhost:5000/offers HTTP/1.1
 Content-Type: application/json
 
 {
-  "title": "Test test test",
-  "description": "Test test test",
-  "postDate": "2022-05-12T11:56:37.573Z",
+  "title": "Testik",
+  "description": "Testik na testike",
+  "postDate": "2024-05-12T11:56:37.573Z",
   "city": "Hamburg",
   "imagePreview": "image.jpg",
   "images": ["image1.jpg", "image2.jpg", "image3.jpg", "image4.jpg", "image5.jpg", "image6.jpg"],

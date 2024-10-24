@@ -11,10 +11,11 @@ import { UserService } from './user-service.interface.js';
 import { Config, RestSchema } from '../../libs/config/index.js';
 import { fillDTO } from '../../helpers/index.js';
 import { UserRDO } from './rdo/user.rdo.js';
-import { UserFavoritesRDO } from './rdo/user-favorites.rdo.js';
 import { ShortOfferRDO } from '../offer/rdo/short-offer.rdo.js';
 import type { ParamUserId } from './type/param-userid.type.js';
 import type { RequestQuery } from './type/request-query.type.js';
+
+const MOCKED_LOGGED_IN_USER_ID = '67056f6fc82961263a52dedf';
 
 @injectable()
 export class UserController extends BaseController {
@@ -87,6 +88,7 @@ export class UserController extends BaseController {
   public async addOfferToFavorites(req: Request<ParamUserId, unknown, unknown, RequestQuery>, res: Response) {
     const { userId } = req.params;
     const { offerId } = req.query;
+    // const userId = req.user.id; // AFTER JWT
 
     if (!userId || !offerId) {
       throw new HttpError(
@@ -111,12 +113,13 @@ export class UserController extends BaseController {
     }
 
     const updatedUser = await this.userService.addFavoriteOffer(validatedUserId, validatedOfferId);
-    this.ok(res, fillDTO(UserFavoritesRDO, updatedUser));
+    this.ok(res, fillDTO(UserRDO, updatedUser));
   }
 
   public async deleteOfferFromFavorites(req: Request<ParamUserId, unknown, unknown, RequestQuery>, res: Response) {
     const { userId } = req.params;
     const { offerId } = req.query;
+    // const userId = req.user.id; // AFTER JWT
 
     if (!userId || !offerId) {
       throw new HttpError(
@@ -141,11 +144,12 @@ export class UserController extends BaseController {
     }
 
     const updatedUser = await this.userService.removeFavoriteOffer(validatedUserId, validatedOfferId);
-    this.ok(res, fillDTO(UserFavoritesRDO, updatedUser));
+    this.ok(res, fillDTO(UserRDO, updatedUser));
   }
 
-  public async getFavoriteOffers(req: Request<ParamUserId>, res: Response) {
-    const { userId } = req.params;
+  public async getFavoriteOffers(_req: Request<ParamUserId>, res: Response) {
+    const userId = MOCKED_LOGGED_IN_USER_ID;
+    // const userId = req.user.id; // AFTER JWT
 
     if (!userId) {
       throw new HttpError(
@@ -157,7 +161,7 @@ export class UserController extends BaseController {
 
     // TODO: добавить обработку статуса 401 NOT_AUTHORIZED, доработать 400 BAD_REQUEST после валидации
     // TODO: добавить корректную валидацию данных из query
-    const validatedUserId = userId.toString();
+    const validatedUserId = userId;
 
     const userExists = await this.userService.findById(validatedUserId);
     if (!userExists) {

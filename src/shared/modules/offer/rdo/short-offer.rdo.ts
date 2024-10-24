@@ -16,6 +16,9 @@ export class ShortOfferRDO {
   public isPremium: boolean;
 
   @Expose()
+  public isFavorite: boolean;
+
+  @Expose()
   public postDate: string;
 
   @Expose()

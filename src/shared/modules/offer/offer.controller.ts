@@ -16,6 +16,8 @@ import type { ParamOfferId } from './type/params-offer-id.type.js';
 import type { CreateOfferRequest } from './type/create-offer-request.type.js';
 import type { UpdateOfferRequest } from './type/update-offer-request.type.js';
 
+const MOCKED_LOGGED_IN_USER_ID = '67056f6fc82961263a52dedf';
+
 @injectable()
 export class OfferController extends BaseController {
   constructor(
@@ -40,6 +42,8 @@ export class OfferController extends BaseController {
 
   public async index(req: Request<ParamsDictionary, unknown, unknown, RequestQuery>, res: Response) {
     const { limit, city, is_premium: isPremium } = req.query;
+    const userId = MOCKED_LOGGED_IN_USER_ID;
+    // const userId = req.user.id // AFTER JWT
 
     if (isPremium && city) {
       await this.getPremiumOffers(req, res);
@@ -58,12 +62,14 @@ export class OfferController extends BaseController {
       );
     }
 
-    const offers = await this.offerService.find(validatedLimit);
+    const offers = await this.offerService.find({ limit: validatedLimit, userId });
     this.ok(res, fillDTO(ShortOfferRDO, offers));
   }
 
   private async getPremiumOffers(req: Request<ParamsDictionary, unknown, unknown, RequestQuery>, res: Response) {
     const { city } = req.query;
+    const userId = MOCKED_LOGGED_IN_USER_ID;
+    // const userId = req.user.id // AFTER JWT
 
     if (!city) {
       throw new HttpError(
@@ -76,14 +82,16 @@ export class OfferController extends BaseController {
     // TODO: добавить валидацию и обработку статуса 400 BAD_REQUEST
     const validatedCity = city as City;
 
-    const premiumOffers = await this.offerService.findPremiumOffers(validatedCity);
+    const premiumOffers = await this.offerService.find({ city: validatedCity, isPremium: true, userId });
     this.ok(res, fillDTO(ShortOfferRDO, premiumOffers));
   }
 
   public async show(req: Request<ParamOfferId>, res: Response) {
     const { offerId } = req.params;
+    const userId = MOCKED_LOGGED_IN_USER_ID;
+    // const userId = req.user.id // AFTER JWT
 
-    const offer = await this.offerService.findById(offerId);
+    const offer = await this.offerService.findById(offerId, userId);
     if (!offer) {
       throw new HttpError(
         StatusCodes.NOT_FOUND,

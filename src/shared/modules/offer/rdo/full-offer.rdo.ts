@@ -31,6 +31,9 @@ export class FullOfferRDO {
   public isPremium: boolean;
 
   @Expose()
+  public isFavorite: boolean;
+
+  @Expose()
   public rentType: RentType;
 
   @Expose()
@@ -51,4 +54,7 @@ export class FullOfferRDO {
 
   @Expose()
   public coordinates: Coordinates;
+
+  @Expose()
+  public commentsCount: number;
 }
