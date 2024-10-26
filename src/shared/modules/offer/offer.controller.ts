@@ -15,6 +15,7 @@ import type { RequestQuery } from './type/request-query.type.js';
 import type { ParamOfferId } from './type/params-offer-id.type.js';
 import type { CreateOfferRequest } from './type/create-offer-request.type.js';
 import type { UpdateOfferRequest } from './type/update-offer-request.type.js';
+import { CommentRDO, CommentService } from '../comment/index.js';
 
 const MOCKED_LOGGED_IN_USER_ID = '67056f6fc82961263a52dedf';
 
@@ -23,6 +24,7 @@ export class OfferController extends BaseController {
   constructor(
     @inject(Component.Logger) protected readonly logger: Logger,
     @inject(Component.OfferService) private readonly offerService: OfferService,
+    @inject(Component.CommentService) private readonly commentService: CommentService
   ) {
     super(logger);
     this.logger.info('Register routes for UserController…');
@@ -32,6 +34,7 @@ export class OfferController extends BaseController {
     this.addRoute({ path: '/:offerId', method: HttpMethod.Get, handler: this.show });
     this.addRoute({ path: '/:offerId', method: HttpMethod.Patch, handler: this.update });
     this.addRoute({ path: '/:offerId', method: HttpMethod.Delete, handler: this.delete });
+    this.addRoute({ path: '/:offerId/comments', method: HttpMethod.Get, handler: this.getComments });
   }
 
   public async create({ body }: CreateOfferRequest, res: Response): Promise<void> {
@@ -135,5 +138,18 @@ export class OfferController extends BaseController {
 
     const deletedOffer = await this.offerService.deleteById(offerId);
     this.noContent(res, fillDTO(FullOfferRDO, deletedOffer));
+  }
+
+  public async getComments({ params }: Request<ParamOfferId>, res: Response): Promise<void> {
+    if (!await this.offerService.exists(params.offerId)) {
+      throw new HttpError(
+        StatusCodes.NOT_FOUND,
+        `Offer with id ${params.offerId} not found.`,
+        'OfferController'
+      );
+    }
+
+    const comments = await this.commentService.findByOfferId(params.offerId);
+    this.ok(res, fillDTO(CommentRDO, comments));
   }
 }
