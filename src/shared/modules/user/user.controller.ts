@@ -2,7 +2,7 @@ import { inject, injectable } from 'inversify';
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
-import { BaseController, HttpError, HttpMethod } from '../../libs/rest/index.js';
+import { BaseController, HttpError, HttpMethod, ValidateObjectIdMiddleware } from '../../libs/rest/index.js';
 import { Logger } from '../../libs/logger/index.js';
 import { Component } from '../../types/index.js';
 import { LoginUserRequest } from './login-user-request.type.js';
@@ -30,9 +30,9 @@ export class UserController extends BaseController {
     this.addRoute({ path: '/register', method: HttpMethod.Post, handler: this.create });
     this.addRoute({ path: '/login', method: HttpMethod.Post, handler: this.login });
     this.addRoute({ path: '/login', method: HttpMethod.Get, handler: this.checkAuthenticate });
-    this.addRoute({ path: '/:userId/favorites', method: HttpMethod.Post, handler: this.addOfferToFavorites });
-    this.addRoute({ path: '/:userId/favorites', method: HttpMethod.Delete, handler: this.deleteOfferFromFavorites });
-    this.addRoute({ path: '/:userId/favorites', method: HttpMethod.Get, handler: this.getFavoriteOffers });
+    this.addRoute({ path: '/:userId/favorites', method: HttpMethod.Post, handler: this.addOfferToFavorites, middlewares: [new ValidateObjectIdMiddleware('userId')] });
+    this.addRoute({ path: '/:userId/favorites', method: HttpMethod.Delete, handler: this.deleteOfferFromFavorites, middlewares: [new ValidateObjectIdMiddleware('userId')] });
+    this.addRoute({ path: '/:userId/favorites', method: HttpMethod.Get, handler: this.getFavoriteOffers, middlewares: [new ValidateObjectIdMiddleware('userId')] });
   }
 
   public async create(
