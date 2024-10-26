@@ -19,6 +19,5 @@ export interface OfferService {
     offerId: string,
     dto: UpdateOfferDTO
   ): Promise<DocumentType<OfferEntity> | null>;
-  incCommentCount(offerId: string): Promise<DocumentType<OfferEntity> | null>;
   exists(documentId: string): Promise<boolean>;
 }
