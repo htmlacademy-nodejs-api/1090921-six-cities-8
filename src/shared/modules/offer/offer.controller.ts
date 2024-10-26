@@ -9,6 +9,7 @@ import {
   HttpMethod,
   ValidateObjectIdMiddleware,
   ValidateDtoMiddleware,
+  DocumentExistsMiddleware,
 } from '../../libs/rest/index.js';
 import { Logger } from '../../libs/logger/index.js';
 import { City, Component } from '../../types/index.js';
@@ -49,7 +50,7 @@ export class OfferController extends BaseController {
       path: '/:offerId',
       method: HttpMethod.Get,
       handler: this.show,
-      middlewares: [new ValidateObjectIdMiddleware('offerId')],
+      middlewares: [new ValidateObjectIdMiddleware('offerId'), new DocumentExistsMiddleware(this.offerService, 'Offer', 'offerId'), ],
     });
     this.addRoute({
       path: '/:offerId',
@@ -57,6 +58,7 @@ export class OfferController extends BaseController {
       handler: this.update,
       middlewares: [
         new ValidateObjectIdMiddleware('offerId'),
+        new DocumentExistsMiddleware(this.offerService, 'Offer', 'offerId'),
         new ValidateDtoMiddleware(UpdateOfferDTO),
       ],
     });
@@ -64,13 +66,13 @@ export class OfferController extends BaseController {
       path: '/:offerId',
       method: HttpMethod.Delete,
       handler: this.delete,
-      middlewares: [new ValidateObjectIdMiddleware('offerId')],
+      middlewares: [new ValidateObjectIdMiddleware('offerId'), new DocumentExistsMiddleware(this.offerService, 'Offer', 'offerId'),],
     });
     this.addRoute({
       path: '/:offerId/comments',
       method: HttpMethod.Get,
       handler: this.getComments,
-      middlewares: [new ValidateObjectIdMiddleware('offerId')],
+      middlewares: [new ValidateObjectIdMiddleware('offerId'), new DocumentExistsMiddleware(this.offerService, 'Offer', 'offerId'),],
     });
   }
 
@@ -78,7 +80,7 @@ export class OfferController extends BaseController {
     { body }: CreateOfferRequest,
     res: Response
   ): Promise<void> {
-    // TODO: добавить обработку статусов 400 BAD_REQUEST & 401 NOT_AUTHORIZED
+    // TODO: добавить обработку статусов 401 NOT_AUTHORIZED
     const result = await this.offerService.create(body);
     this.created(res, fillDTO(FullOfferRDO, result));
   }
@@ -148,13 +150,6 @@ export class OfferController extends BaseController {
     // const userId = req.user.id // AFTER JWT
 
     const offer = await this.offerService.findById(offerId, userId);
-    if (!offer) {
-      throw new HttpError(
-        StatusCodes.NOT_FOUND,
-        'Offer not found',
-        'OfferController'
-      );
-    }
 
     this.ok(res, fillDTO(FullOfferRDO, offer));
   }
@@ -162,15 +157,7 @@ export class OfferController extends BaseController {
   public async update(req: UpdateOfferRequest, res: Response) {
     const { offerId } = req.params;
 
-    // TODO: добавить валидацию и обработку статусов 400, 401, 403
-    const offer = await this.offerService.findById(offerId);
-    if (!offer) {
-      throw new HttpError(
-        StatusCodes.NOT_FOUND,
-        'Offer not found',
-        'OfferController'
-      );
-    }
+    // TODO: добавить обработку статусов 401, 403
 
     const updatedOffer = await this.offerService.updateById(offerId, req.body);
     this.ok(res, fillDTO(FullOfferRDO, updatedOffer));
@@ -179,15 +166,7 @@ export class OfferController extends BaseController {
   public async delete(req: Request<ParamOfferId>, res: Response) {
     const { offerId } = req.params;
 
-    // TODO: добавить валидацию и обработку статусов 401, 403
-    const offer = await this.offerService.findById(offerId);
-    if (!offer) {
-      throw new HttpError(
-        StatusCodes.NOT_FOUND,
-        'Offer not found',
-        'OfferController'
-      );
-    }
+    // TODO: добавить обработку статусов 401, 403
 
     const deletedOffer = await this.offerService.deleteById(offerId);
     this.noContent(res, fillDTO(FullOfferRDO, deletedOffer));
@@ -197,14 +176,6 @@ export class OfferController extends BaseController {
     { params }: Request<ParamOfferId>,
     res: Response
   ): Promise<void> {
-    if (!(await this.offerService.exists(params.offerId))) {
-      throw new HttpError(
-        StatusCodes.NOT_FOUND,
-        `Offer with id ${params.offerId} not found.`,
-        'OfferController'
-      );
-    }
-
     const comments = await this.commentService.findByOfferId(params.offerId);
     this.ok(res, fillDTO(CommentRDO, comments));
   }

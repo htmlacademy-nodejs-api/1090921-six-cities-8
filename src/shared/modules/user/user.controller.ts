@@ -8,6 +8,7 @@ import {
   HttpMethod,
   ValidateObjectIdMiddleware,
   ValidateDtoMiddleware,
+  DocumentExistsMiddleware
 } from '../../libs/rest/index.js';
 import { Logger } from '../../libs/logger/index.js';
 import { Component } from '../../types/index.js';
@@ -56,19 +57,19 @@ export class UserController extends BaseController {
       path: '/:userId/favorites',
       method: HttpMethod.Post,
       handler: this.addOfferToFavorites,
-      middlewares: [new ValidateObjectIdMiddleware('userId')],
+      middlewares: [new ValidateObjectIdMiddleware('userId'), new DocumentExistsMiddleware(this.userService, 'User', 'userId')],
     });
     this.addRoute({
       path: '/:userId/favorites',
       method: HttpMethod.Delete,
       handler: this.deleteOfferFromFavorites,
-      middlewares: [new ValidateObjectIdMiddleware('userId')],
+      middlewares: [new ValidateObjectIdMiddleware('userId'), new DocumentExistsMiddleware(this.userService, 'User', 'userId')],
     });
     this.addRoute({
       path: '/:userId/favorites',
       method: HttpMethod.Get,
       handler: this.getFavoriteOffers,
-      middlewares: [new ValidateObjectIdMiddleware('userId')],
+      middlewares: [new ValidateObjectIdMiddleware('userId'), new DocumentExistsMiddleware(this.userService, 'User', 'userId')],
     });
   }
 
