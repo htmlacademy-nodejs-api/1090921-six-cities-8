@@ -1,4 +1,4 @@
-import { IsArray, IsDateString, IsEnum, IsInt, IsMongoId, Max, MaxLength, Min, MinLength, ArrayMinSize, IsObject, IsNumber, IsBoolean } from 'class-validator';
+import { IsArray, IsDateString, IsEnum, IsInt, IsMongoId, Max, MaxLength, Min, MinLength, ArrayMinSize, IsObject, IsBoolean } from 'class-validator';
 
 import { City, RentType, Amenity } from '../../../types/index.js';
 import { CreateOfferValidationMessage } from './create-offer.messages.js';
@@ -53,7 +53,6 @@ export class CreateOfferDTO {
   public author: string;
 
   @IsObject({ message: CreateOfferValidationMessage.coordinates.invalidObject })
-  @IsNumber({ maxDecimalPlaces: 6 }, { each: true, message: CreateOfferValidationMessage.coordinates.invalid })
   public coordinates: {
     latitude: number;
     longitude: number;

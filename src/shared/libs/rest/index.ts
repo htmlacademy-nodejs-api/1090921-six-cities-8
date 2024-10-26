@@ -14,3 +14,4 @@ export { HttpError } from './errors/index.js';
 
 export { Middleware } from './middleware/middleware.interface.js';
 export { ValidateObjectIdMiddleware } from './middleware/validate-objectid.middleware.js';
+export { ValidateDtoMiddleware } from './middleware/validate-dto.middleware.js';
