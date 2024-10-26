@@ -24,7 +24,7 @@ export class ImportCommand implements Command {
 
     this.logger = new ConsoleLogger();
     this.offerService = new DefaultOfferService(this.logger, OfferModel);
-    this.userService = new DefaultUserService(this.logger, UserModel);
+    this.userService = new DefaultUserService(this.logger, UserModel, OfferModel);
     this.databaseClient = new MongoDatabaseClient(this.logger);
   }
 

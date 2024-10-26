@@ -3,6 +3,8 @@ export {
   getRandomBoolean,
   getRandomItems,
   getRandomItem,
+  fillDTO,
+  createErrorObject,
 } from './common.js';
 
 export {
@@ -16,6 +18,8 @@ export {
   CHUNK_SIZE,
   RADIX
 } from './constants.js';
+
+export { AGGREGATIONS } from './common-aggregations.js';
 
 export { getMongoURI } from './database.js';
 export { createSHA256 } from './hash.js';

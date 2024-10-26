@@ -7,11 +7,18 @@ import { City } from '../../types/city.enum.js';
 
 export interface OfferService {
   create(dto: CreateOfferDTO): Promise<DocumentType<OfferEntity>>;
-  find(userId?: string): Promise<DocumentType<OfferEntity>[]>;
-  findPremiumOffers(city: City): Promise<DocumentType<OfferEntity>[]>;
+  find(filters: {
+    limit?: number;
+    city?: City;
+    isPremium?: boolean;
+    userId?: string;
+  }): Promise<DocumentType<OfferEntity>[]>;
   findById(offerId: string, userId?: string): Promise<DocumentType<OfferEntity> | null>;
   deleteById(offerId: string): Promise<DocumentType<OfferEntity> | null>;
-  updateById(offerId: string, dto: UpdateOfferDTO): Promise<DocumentType<OfferEntity> | null>;
+  updateById(
+    offerId: string,
+    dto: UpdateOfferDTO
+  ): Promise<DocumentType<OfferEntity> | null>;
   incCommentCount(offerId: string): Promise<DocumentType<OfferEntity> | null>;
   exists(documentId: string): Promise<boolean>;
 }

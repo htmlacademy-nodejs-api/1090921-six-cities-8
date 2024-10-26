@@ -8,7 +8,11 @@ import { OfferEntity } from './offer.entity.js';
 import { CreateOfferDTO } from './dto/create-offer.dto.js';
 import { UpdateOfferDTO } from './dto/update-offer.dto.js';
 import { PREMIUM_OFFERS_LIMIT } from './offer.constants.js';
-import { findOfferByIdAggregation, findOffersAggregation } from './offer.aggregation.js';
+
+import {
+  findOfferByIdAggregation,
+  findOffersAggregation,
+} from './offer.aggregation.js';
 
 @injectable()
 export class DefaultOfferService implements OfferService {
@@ -26,34 +30,27 @@ export class DefaultOfferService implements OfferService {
   }
 
   public async findById(
-    offerId: string,
-    userId?: string
+    offerId: string, userId?: string
   ): Promise<DocumentType<OfferEntity> | null> {
     const pipeline = findOfferByIdAggregation(offerId, userId);
-    const result = await this.offerModel
-      .aggregate(pipeline)
-      .exec();
+    const result = await this.offerModel.aggregate(pipeline).exec();
 
     return result[0] || null;
   }
 
-  public async find(userId?: string): Promise<DocumentType<OfferEntity>[]> {
-    const pipeline = findOffersAggregation(userId);
-    return this.offerModel
-      .aggregate(pipeline)
-      .exec();
-  }
-
-  public async findPremiumOffers(
-    city: City
-  ): Promise<DocumentType<OfferEntity>[]> {
-    return this.offerModel
-      .find({
-        city,
-        isPremium: true,
-      })
-      .limit(PREMIUM_OFFERS_LIMIT)
-      .exec();
+  public async find({ limit, city, isPremium, userId }: {
+    limit?: number;
+    city?: City;
+    isPremium?: boolean;
+    userId?: string;
+  }): Promise<DocumentType<OfferEntity>[]> {
+    const pipeline = findOffersAggregation({
+      limit: isPremium ? PREMIUM_OFFERS_LIMIT : limit,
+      city,
+      isPremium,
+      userId
+    });
+    return this.offerModel.aggregate(pipeline).exec();
   }
 
   public async deleteById(

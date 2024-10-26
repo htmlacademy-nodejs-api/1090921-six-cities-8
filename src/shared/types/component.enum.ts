@@ -12,4 +12,9 @@ export const Component = {
 
   CommentService: Symbol('CommentService'),
   CommentModel: Symbol('CommentModel'),
+
+  ExceptionFilter: Symbol('ExceptionFilter'),
+
+  UserController: Symbol('UserController'),
+  OfferController: Symbol('OfferController'),
 } as const;
