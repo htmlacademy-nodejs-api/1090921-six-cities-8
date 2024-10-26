@@ -144,15 +144,6 @@ export class UserController extends BaseController {
     const validatedUserId = userId.toString();
     const validatedOfferId = offerId.toString();
 
-    const userExists = await this.userService.findById(validatedUserId);
-    if (!userExists) {
-      throw new HttpError(
-        StatusCodes.NOT_FOUND,
-        'User not found',
-        'UserController'
-      );
-    }
-
     const updatedUser = await this.userService.addFavoriteOffer(
       validatedUserId,
       validatedOfferId
@@ -181,15 +172,6 @@ export class UserController extends BaseController {
     const validatedUserId = userId.toString();
     const validatedOfferId = offerId.toString();
 
-    const userExists = await this.userService.findById(validatedUserId);
-    if (!userExists) {
-      throw new HttpError(
-        StatusCodes.NOT_FOUND,
-        'User not found',
-        'UserController'
-      );
-    }
-
     const updatedUser = await this.userService.removeFavoriteOffer(
       validatedUserId,
       validatedOfferId
@@ -212,15 +194,6 @@ export class UserController extends BaseController {
     // TODO: добавить обработку статуса 401 NOT_AUTHORIZED, доработать 400 BAD_REQUEST после валидации
     // TODO: добавить корректную валидацию данных из query
     const validatedUserId = userId;
-
-    const userExists = await this.userService.findById(validatedUserId);
-    if (!userExists) {
-      throw new HttpError(
-        StatusCodes.NOT_FOUND,
-        'User not found',
-        'UserController'
-      );
-    }
 
     const favoriteOffers = await this.userService.findUserFavorites(
       validatedUserId
