@@ -19,8 +19,8 @@ POST http://localhost:5000/offers HTTP/1.1
 Content-Type: application/json
 
 {
-  "title": "Testik",
-  "description": "Testik na testike",
+  "title": "Hamburger village",
+  "description": "Test description",
   "postDate": "2024-05-12T11:56:37.573Z",
   "city": "Hamburg",
   "imagePreview": "image.jpg",
@@ -29,6 +29,7 @@ Content-Type: application/json
   "roomsCount": 2,
   "guestsCount": 4,
   "price": 3500,
+  "isPremium": true,
   "amenities": ["Washer", "Towels"],
   "author": "67056f6fc82961263a52dedf",
   "coordinates": {
