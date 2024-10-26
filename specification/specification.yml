@@ -326,17 +326,13 @@ paths:
                   $ref: '#/components/schemas/comment'
         '404':
           description: Комментарии не найдены
+    
+  /comments:
     post:
       summary: Добавление комментария для предложения
       description: Добавление нового комментария к предложению
       tags:
         - comments
-      parameters:
-        - name: offerId
-          in: path
-          required: true
-          schema:
-            type: integer
       requestBody:
         required: true
         content:

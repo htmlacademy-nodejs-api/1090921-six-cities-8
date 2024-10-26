@@ -97,4 +97,8 @@ export class DefaultUserService implements UserService {
       )
       .exec();
   }
+
+  public async exists(documentId: string): Promise<boolean> {
+    return this.userModel.exists({ _id: documentId }).then((r) => !!r);
+  }
 }

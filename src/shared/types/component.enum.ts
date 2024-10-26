@@ -17,4 +17,5 @@ export const Component = {
 
   UserController: Symbol('UserController'),
   OfferController: Symbol('OfferController'),
+  CommentController: Symbol('CommentController'),
 } as const;

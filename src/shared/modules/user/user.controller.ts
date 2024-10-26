@@ -2,7 +2,14 @@ import { inject, injectable } from 'inversify';
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
-import { BaseController, HttpError, HttpMethod } from '../../libs/rest/index.js';
+import {
+  BaseController,
+  HttpError,
+  HttpMethod,
+  ValidateObjectIdMiddleware,
+  ValidateDtoMiddleware,
+  DocumentExistsMiddleware
+} from '../../libs/rest/index.js';
 import { Logger } from '../../libs/logger/index.js';
 import { Component } from '../../types/index.js';
 import { LoginUserRequest } from './login-user-request.type.js';
@@ -14,6 +21,8 @@ import { UserRDO } from './rdo/user.rdo.js';
 import { ShortOfferRDO } from '../offer/rdo/short-offer.rdo.js';
 import type { ParamUserId } from './type/param-userid.type.js';
 import type { RequestQuery } from './type/request-query.type.js';
+import { CreateUserDTO } from './dto/create-user.dto.js';
+import { LoginUserDTO } from './dto/login-user.dto.js';
 
 const MOCKED_LOGGED_IN_USER_ID = '67056f6fc82961263a52dedf';
 
@@ -22,22 +31,51 @@ export class UserController extends BaseController {
   constructor(
     @inject(Component.Logger) protected readonly logger: Logger,
     @inject(Component.UserService) private readonly userService: UserService,
-    @inject(Component.Config) private readonly configService: Config<RestSchema>,
+    @inject(Component.Config) private readonly configService: Config<RestSchema>
   ) {
     super(logger);
     this.logger.info('Register routes for UserController…');
 
-    this.addRoute({ path: '/register', method: HttpMethod.Post, handler: this.create });
-    this.addRoute({ path: '/login', method: HttpMethod.Post, handler: this.login });
-    this.addRoute({ path: '/login', method: HttpMethod.Get, handler: this.checkAuthenticate });
-    this.addRoute({ path: '/:userId/favorites', method: HttpMethod.Post, handler: this.addOfferToFavorites });
-    this.addRoute({ path: '/:userId/favorites', method: HttpMethod.Delete, handler: this.deleteOfferFromFavorites });
-    this.addRoute({ path: '/:userId/favorites', method: HttpMethod.Get, handler: this.getFavoriteOffers });
+    this.addRoute({
+      path: '/register',
+      method: HttpMethod.Post,
+      handler: this.create,
+      middlewares: [new ValidateDtoMiddleware(CreateUserDTO)],
+    });
+    this.addRoute({
+      path: '/login',
+      method: HttpMethod.Post,
+      handler: this.login,
+      middlewares: [new ValidateDtoMiddleware(LoginUserDTO)],
+    });
+    this.addRoute({
+      path: '/login',
+      method: HttpMethod.Get,
+      handler: this.checkAuthenticate,
+    });
+    this.addRoute({
+      path: '/:userId/favorites',
+      method: HttpMethod.Post,
+      handler: this.addOfferToFavorites,
+      middlewares: [new ValidateObjectIdMiddleware('userId'), new DocumentExistsMiddleware(this.userService, 'User', 'userId')],
+    });
+    this.addRoute({
+      path: '/:userId/favorites',
+      method: HttpMethod.Delete,
+      handler: this.deleteOfferFromFavorites,
+      middlewares: [new ValidateObjectIdMiddleware('userId'), new DocumentExistsMiddleware(this.userService, 'User', 'userId')],
+    });
+    this.addRoute({
+      path: '/:userId/favorites',
+      method: HttpMethod.Get,
+      handler: this.getFavoriteOffers,
+      middlewares: [new ValidateObjectIdMiddleware('userId'), new DocumentExistsMiddleware(this.userService, 'User', 'userId')],
+    });
   }
 
   public async create(
     { body }: CreateUserRequest,
-    res: Response,
+    res: Response
   ): Promise<void> {
     const userExists = await this.userService.findByEmail(body.email);
 
@@ -50,21 +88,21 @@ export class UserController extends BaseController {
       );
     }
 
-    const result = await this.userService.create(body, this.configService.get('SALT'));
+    const result = await this.userService.create(
+      body,
+      this.configService.get('SALT')
+    );
     this.created(res, fillDTO(UserRDO, result));
   }
 
-  public async login(
-    { body }: LoginUserRequest,
-    _: Response,
-  ): Promise<void> {
+  public async login({ body }: LoginUserRequest, _: Response): Promise<void> {
     const userExists = await this.userService.findByEmail(body.email);
 
     if (!userExists) {
       throw new HttpError(
         StatusCodes.UNAUTHORIZED,
         `User with email ${body.email} not found.`,
-        'UserController',
+        'UserController'
       );
     }
 
@@ -72,7 +110,7 @@ export class UserController extends BaseController {
     throw new HttpError(
       StatusCodes.NOT_IMPLEMENTED,
       'Not implemented',
-      'UserController',
+      'UserController'
     );
   }
 
@@ -81,11 +119,14 @@ export class UserController extends BaseController {
     throw new HttpError(
       StatusCodes.NOT_IMPLEMENTED,
       'Not implemented',
-      'UserController',
+      'UserController'
     );
   }
 
-  public async addOfferToFavorites(req: Request<ParamUserId, unknown, unknown, RequestQuery>, res: Response) {
+  public async addOfferToFavorites(
+    req: Request<ParamUserId, unknown, unknown, RequestQuery>,
+    res: Response
+  ) {
     const { userId } = req.params;
     const { offerId } = req.query;
     // const userId = req.user.id; // AFTER JWT
@@ -94,7 +135,7 @@ export class UserController extends BaseController {
       throw new HttpError(
         StatusCodes.BAD_REQUEST,
         'Please provide userId and offerId',
-        'UserController',
+        'UserController'
       );
     }
 
@@ -103,20 +144,17 @@ export class UserController extends BaseController {
     const validatedUserId = userId.toString();
     const validatedOfferId = offerId.toString();
 
-    const userExists = await this.userService.findById(validatedUserId);
-    if (!userExists) {
-      throw new HttpError(
-        StatusCodes.NOT_FOUND,
-        'User not found',
-        'UserController'
-      );
-    }
-
-    const updatedUser = await this.userService.addFavoriteOffer(validatedUserId, validatedOfferId);
+    const updatedUser = await this.userService.addFavoriteOffer(
+      validatedUserId,
+      validatedOfferId
+    );
     this.ok(res, fillDTO(UserRDO, updatedUser));
   }
 
-  public async deleteOfferFromFavorites(req: Request<ParamUserId, unknown, unknown, RequestQuery>, res: Response) {
+  public async deleteOfferFromFavorites(
+    req: Request<ParamUserId, unknown, unknown, RequestQuery>,
+    res: Response
+  ) {
     const { userId } = req.params;
     const { offerId } = req.query;
     // const userId = req.user.id; // AFTER JWT
@@ -125,7 +163,7 @@ export class UserController extends BaseController {
       throw new HttpError(
         StatusCodes.BAD_REQUEST,
         'Please provide userId and offerId',
-        'UserController',
+        'UserController'
       );
     }
 
@@ -134,16 +172,10 @@ export class UserController extends BaseController {
     const validatedUserId = userId.toString();
     const validatedOfferId = offerId.toString();
 
-    const userExists = await this.userService.findById(validatedUserId);
-    if (!userExists) {
-      throw new HttpError(
-        StatusCodes.NOT_FOUND,
-        'User not found',
-        'UserController'
-      );
-    }
-
-    const updatedUser = await this.userService.removeFavoriteOffer(validatedUserId, validatedOfferId);
+    const updatedUser = await this.userService.removeFavoriteOffer(
+      validatedUserId,
+      validatedOfferId
+    );
     this.ok(res, fillDTO(UserRDO, updatedUser));
   }
 
@@ -155,7 +187,7 @@ export class UserController extends BaseController {
       throw new HttpError(
         StatusCodes.BAD_REQUEST,
         'Please provide userId',
-        'UserController',
+        'UserController'
       );
     }
 
@@ -163,16 +195,9 @@ export class UserController extends BaseController {
     // TODO: добавить корректную валидацию данных из query
     const validatedUserId = userId;
 
-    const userExists = await this.userService.findById(validatedUserId);
-    if (!userExists) {
-      throw new HttpError(
-        StatusCodes.NOT_FOUND,
-        'User not found',
-        'UserController'
-      );
-    }
-
-    const favoriteOffers = await this.userService.findUserFavorites(validatedUserId);
+    const favoriteOffers = await this.userService.findUserFavorites(
+      validatedUserId
+    );
     this.ok(res, fillDTO(ShortOfferRDO, favoriteOffers));
   }
 }

@@ -72,16 +72,4 @@ export class DefaultOfferService implements OfferService {
   public async exists(documentId: string): Promise<boolean> {
     return this.offerModel.exists({ _id: documentId }).then((r) => !!r);
   }
-
-  public async incCommentCount(
-    offerId: string
-  ): Promise<DocumentType<OfferEntity> | null> {
-    return this.offerModel
-      .findByIdAndUpdate(offerId, {
-        $inc: {
-          commentCount: 1,
-        },
-      })
-      .exec();
-  }
 }
