@@ -25,6 +25,8 @@ import type { RequestQuery } from './type/request-query.type.js';
 import { CreateUserDTO } from './dto/create-user.dto.js';
 import { LoginUserDTO } from './dto/login-user.dto.js';
 import { Types } from 'mongoose';
+import { AuthService } from '../auth/index.js';
+import { LoggedUserRDO } from './rdo/logged-user.rdo.js';
 
 const MOCKED_LOGGED_IN_USER_ID = '67056f6fc82961263a52dedf';
 
@@ -33,7 +35,8 @@ export class UserController extends BaseController {
   constructor(
     @inject(Component.Logger) protected readonly logger: Logger,
     @inject(Component.UserService) private readonly userService: UserService,
-    @inject(Component.Config) private readonly configService: Config<RestSchema>
+    @inject(Component.Config) private readonly configService: Config<RestSchema>,
+    @inject(Component.AuthService) private readonly authService: AuthService,
   ) {
     super(logger);
     this.logger.info('Register routes for UserController…');
@@ -105,32 +108,28 @@ export class UserController extends BaseController {
     this.created(res, fillDTO(UserRDO, result));
   }
 
-  public async login({ body }: LoginUserRequest, _: Response): Promise<void> {
-    const userExists = await this.userService.findByEmail(body.email);
-
-    if (!userExists) {
-      throw new HttpError(
-        StatusCodes.UNAUTHORIZED,
-        `User with email ${body.email} not found.`,
-        'UserController'
-      );
-    }
-
-    // TODO: Добавить обработку статусов 200
-    throw new HttpError(
-      StatusCodes.NOT_IMPLEMENTED,
-      'Not implemented',
-      'UserController'
-    );
+  public async login({ body }: LoginUserRequest, res: Response): Promise<void> {
+    const user = await this.authService.verify(body);
+    const token = await this.authService.authenticate(user);
+    const responseData = fillDTO(LoggedUserRDO, {
+      email: user.email,
+      token,
+    });
+    this.ok(res, responseData);
   }
 
   public async checkAuthenticate() {
-    // TODO: Добавить обработку статусов 200 и 401 NOT_AUTHORIZED
-    throw new HttpError(
-      StatusCodes.NOT_IMPLEMENTED,
-      'Not implemented',
-      'UserController'
-    );
+    // const foundUser = await this.userService.findByEmail(email);
+
+    // if (!foundUser) {
+    //   throw new HttpError(
+    //     StatusCodes.UNAUTHORIZED,
+    //     'Unauthorized',
+    //     'UserController'
+    //   );
+    // }
+
+    // this.ok(res, fillDTO(LoggedUserRDO, foundUser));
   }
 
   public async addOfferToFavorites(
