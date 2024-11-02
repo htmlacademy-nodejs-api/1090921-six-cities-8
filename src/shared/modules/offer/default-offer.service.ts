@@ -38,16 +38,18 @@ export class DefaultOfferService implements OfferService {
     return result[0] || null;
   }
 
-  public async find({ limit, city, isPremium, userId }: {
+  public async find({ limit, city, isPremium, isFavorite, userId }: {
     limit?: number;
     city?: City;
     isPremium?: boolean;
+    isFavorite?: boolean;
     userId?: string;
   }): Promise<DocumentType<OfferEntity>[]> {
     const pipeline = findOffersAggregation({
       limit: isPremium ? PREMIUM_OFFERS_LIMIT : limit,
       city,
       isPremium,
+      isFavorite,
       userId
     });
     return this.offerModel.aggregate(pipeline).exec();

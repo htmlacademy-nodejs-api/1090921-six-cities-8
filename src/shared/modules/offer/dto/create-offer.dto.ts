@@ -1,4 +1,4 @@
-import { IsArray, IsDateString, IsEnum, IsInt, IsMongoId, Max, MaxLength, Min, MinLength, ArrayMinSize, IsObject, IsBoolean } from 'class-validator';
+import { IsArray, IsDateString, IsEnum, IsInt, Max, MaxLength, Min, MinLength, ArrayMinSize, IsObject, IsBoolean } from 'class-validator';
 
 import { City, RentType, Amenity } from '../../../types/index.js';
 import { CREATE_OFFER_VALIDATION_MESSAGE } from './create-offer.messages.js';
@@ -51,7 +51,6 @@ export class CreateOfferDTO {
   @IsEnum(Amenity, { each: true, message: CREATE_OFFER_VALIDATION_MESSAGE.AMENITIES.INVALID })
   public amenities: Amenity[];
 
-  @IsMongoId({ message: CREATE_OFFER_VALIDATION_MESSAGE.USER_ID.INVALID_ID })
   public author: string;
 
   @IsObject({ message: CREATE_OFFER_VALIDATION_MESSAGE.COORDINATES.INVALID_OBJECT })

@@ -43,7 +43,7 @@ Content-Type: application/json
 
 ## Удалить объявление по идентификатору
 
-DELETE http://localhost:5000/offers/67056f6fc82961263a52deea HTTP/1.1
+DELETE http://localhost:5000/offers/671697acf3a04cae3182f3f2 HTTP/1.1
 
 ###
 
