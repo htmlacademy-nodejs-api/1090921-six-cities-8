@@ -102,7 +102,7 @@ export class OfferController extends BaseController {
   ): Promise<void> {
     const result = await this.offerService.create({
       ...body,
-      author: tokenPayload.id,
+      author: tokenPayload?.id,
     });
     this.created(res, fillDTO(FullOfferRDO, result));
   }
@@ -111,20 +111,21 @@ export class OfferController extends BaseController {
     req: Request<ParamsDictionary, unknown, unknown, RequestQuery>,
     res: Response
   ) {
-    const { limit, city, is_premium: isPremium } = req.query;
-    const userId = req.tokenPayload.id;
+    const { limit, city, is_favorite: isFavorite, is_premium: isPremium } = req.query;
+    const userId = req.tokenPayload?.id;
 
     const offers = await this.offerService.find({
       limit,
       userId,
       city: city ? (city as City) : undefined,
       isPremium: isPremium ? parseBoolean(isPremium) : undefined,
+      isFavorite: isFavorite ? parseBoolean(isFavorite) : undefined,
     });
     this.ok(res, fillDTO(ShortOfferRDO, offers));
   }
 
   public async show(req: Request<ParamOfferId>, res: Response) {
-    const userId = req.tokenPayload.id;
+    const userId = req.tokenPayload?.id;
     const { offerId } = req.params;
 
     if (!offerId || !Types.ObjectId.isValid(offerId)) {
@@ -142,7 +143,7 @@ export class OfferController extends BaseController {
 
   public async update(req: UpdateOfferRequest, res: Response) {
     const { offerId } = req.params;
-    const userId = req.tokenPayload.id;
+    const userId = req.tokenPayload?.id;
 
     const foundOffer = await this.offerService.findById(offerId);
 
@@ -160,7 +161,7 @@ export class OfferController extends BaseController {
 
   public async delete(req: Request<ParamOfferId>, res: Response) {
     const { offerId } = req.params;
-    const userId = req.tokenPayload.id;
+    const userId = req.tokenPayload?.id;
 
     const foundOffer = await this.offerService.findById(offerId);
 

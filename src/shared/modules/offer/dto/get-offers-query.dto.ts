@@ -18,4 +18,9 @@ export class GetOffersQueryDTO {
   @IsString()
   // eslint-disable-next-line camelcase
   public is_premium: string;
+
+  @IsOptional()
+  @IsString()
+  // eslint-disable-next-line camelcase
+  public is_favorite: string;
 }

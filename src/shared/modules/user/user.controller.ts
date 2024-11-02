@@ -136,7 +136,7 @@ export class UserController extends BaseController {
     req: Request<RequestParams, unknown, unknown, RequestQuery>,
     res: Response
   ) {
-    const userId = req.tokenPayload.id;
+    const userId = req.tokenPayload?.id;
     const { offerId } = req.query;
 
     if (!offerId) {
@@ -158,7 +158,7 @@ export class UserController extends BaseController {
     req: Request<RequestParams, unknown, unknown, RequestQuery>,
     res: Response
   ) {
-    const userId = req.tokenPayload.id;
+    const userId = req.tokenPayload?.id;
     const { offerId } = req.query;
 
     if (!offerId) {
@@ -177,7 +177,7 @@ export class UserController extends BaseController {
   }
 
   public async getFavoriteOffers(req: Request, res: Response) {
-    const userId = req.tokenPayload.id;
+    const userId = req.tokenPayload?.id;
 
     const favoriteOffers = await this.userService.findUserFavorites(userId);
     this.ok(res, fillDTO(ShortOfferRDO, favoriteOffers));

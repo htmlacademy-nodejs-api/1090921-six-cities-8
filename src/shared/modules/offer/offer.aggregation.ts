@@ -49,23 +49,35 @@ export const findOffersAggregation = ({
   limit,
   city,
   isPremium,
+  isFavorite,
   userId,
 }: {
   limit?: number;
   city?: City;
   isPremium?: boolean;
+  isFavorite?: boolean;
   userId?: string;
 }) => {
+  const matchConditions: Record<string, City | boolean> = {};
+
+  if (city && isPremium) {
+    matchConditions.city = city;
+    matchConditions.isPremium = isPremium;
+  }
+  if (isFavorite && userId) {
+    matchConditions.isFavorite = isFavorite;
+  }
+
+  const filterNeeded = !!Object.keys(matchConditions).length;
+
   const pipeline = [
     AGGREGATIONS.lookupFromComments,
     AGGREGATIONS.populateAuthor,
     AGGREGATIONS.unwindAuthor,
     addOfferFields,
     { $unset: ['comments'] },
-    ...(city && isPremium !== undefined
-      ? [{ $match: { city, isPremium } }]
-      : []),
     ...(userId ? [lookupForFavorites(userId), addIsFavoriteField] : []),
+    ...(filterNeeded ? [{ $match: matchConditions }] : []),
     { $limit: limit || MAX_OFFERS_COUNT },
     { $sort: { postDate: SortType.Down } },
   ];
