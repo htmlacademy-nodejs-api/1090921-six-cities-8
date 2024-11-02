@@ -142,16 +142,17 @@ export class OfferController extends BaseController {
 
   public async update(req: UpdateOfferRequest, res: Response) {
     const { offerId } = req.params;
+    const userId = req.tokenPayload.id;
 
-    if (!offerId || !Types.ObjectId.isValid(offerId)) {
+    const foundOffer = await this.offerService.findById(offerId);
+
+    if (!foundOffer?.author._id || !foundOffer.author._id.equals(userId)) {
       throw new HttpError(
-        StatusCodes.BAD_REQUEST,
-        'Please provide correct offerId',
+        StatusCodes.FORBIDDEN,
+        'You do not have rights to edit this offer',
         'OfferController'
       );
     }
-
-    // TODO: добавить обработку статусов 403
 
     const updatedOffer = await this.offerService.updateById(offerId, req.body);
     this.ok(res, fillDTO(FullOfferRDO, updatedOffer));
@@ -159,16 +160,17 @@ export class OfferController extends BaseController {
 
   public async delete(req: Request<ParamOfferId>, res: Response) {
     const { offerId } = req.params;
+    const userId = req.tokenPayload.id;
 
-    if (!offerId || !Types.ObjectId.isValid(offerId)) {
+    const foundOffer = await this.offerService.findById(offerId);
+
+    if (!foundOffer?.author._id || !foundOffer.author._id.equals(userId)) {
       throw new HttpError(
-        StatusCodes.BAD_REQUEST,
-        'Please provide correct offerId',
+        StatusCodes.FORBIDDEN,
+        'You do not have rights to edit this offer',
         'OfferController'
       );
     }
-
-    // TODO: добавить обработку статусов 403
 
     const deletedOffer = await this.offerService.deleteById(offerId);
     this.noContent(res, fillDTO(FullOfferRDO, deletedOffer));

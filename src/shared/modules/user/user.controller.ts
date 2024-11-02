@@ -7,8 +7,10 @@ import {
   HttpError,
   HttpMethod,
   ValidateDtoMiddleware,
+  ValidateQueryMiddleware,
   UploadFileMiddleware,
   PrivateRouteMiddleware,
+  RequestParams,
 } from '../../libs/rest/index.js';
 import { Logger } from '../../libs/logger/index.js';
 import { Component } from '../../types/index.js';
@@ -19,13 +21,12 @@ import { Config, RestSchema } from '../../libs/config/index.js';
 import { fillDTO } from '../../helpers/index.js';
 import { UserRDO } from './rdo/user.rdo.js';
 import { ShortOfferRDO } from '../offer/rdo/short-offer.rdo.js';
-import type { ParamUserId } from './type/param-userid.type.js';
 import type { RequestQuery } from './type/request-query.type.js';
 import { CreateUserDTO } from './dto/create-user.dto.js';
 import { LoginUserDTO } from './dto/login-user.dto.js';
-import { Types } from 'mongoose';
 import { AuthService } from '../auth/index.js';
 import { LoggedUserRDO } from './rdo/logged-user.rdo.js';
+import { UpdateFavoritesQueryDTO } from './dto/update-favorites-query.dto.js';
 
 @injectable()
 export class UserController extends BaseController {
@@ -60,13 +61,13 @@ export class UserController extends BaseController {
       path: '/favorites',
       method: HttpMethod.Post,
       handler: this.addOfferToFavorites,
-      middlewares: [new PrivateRouteMiddleware()],
+      middlewares: [new PrivateRouteMiddleware(), new ValidateQueryMiddleware(UpdateFavoritesQueryDTO)],
     });
     this.addRoute({
       path: '/favorites',
       method: HttpMethod.Delete,
       handler: this.deleteOfferFromFavorites,
-      middlewares: [new PrivateRouteMiddleware()],
+      middlewares: [new PrivateRouteMiddleware(), new ValidateQueryMiddleware(UpdateFavoritesQueryDTO)],
     });
     this.addRoute({
       path: '/favorites',
@@ -132,21 +133,19 @@ export class UserController extends BaseController {
   }
 
   public async addOfferToFavorites(
-    req: Request<ParamUserId, unknown, unknown, RequestQuery>,
+    req: Request<RequestParams, unknown, unknown, RequestQuery>,
     res: Response
   ) {
     const userId = req.tokenPayload.id;
     const { offerId } = req.query;
 
-    if (!offerId || !Types.ObjectId.isValid(offerId)) {
+    if (!offerId) {
       throw new HttpError(
         StatusCodes.BAD_REQUEST,
-        'Please provide correct offerId',
+        'Please provide offerId',
         'OfferController'
       );
     }
-
-    // TODO: добавить обработку статуса 403
 
     const updatedUser = await this.userService.addFavoriteOffer(
       userId,
@@ -156,21 +155,19 @@ export class UserController extends BaseController {
   }
 
   public async deleteOfferFromFavorites(
-    req: Request<ParamUserId, unknown, unknown, RequestQuery>,
+    req: Request<RequestParams, unknown, unknown, RequestQuery>,
     res: Response
   ) {
     const userId = req.tokenPayload.id;
     const { offerId } = req.query;
 
-    if (!offerId || !Types.ObjectId.isValid(offerId)) {
+    if (!offerId) {
       throw new HttpError(
         StatusCodes.BAD_REQUEST,
         'Please provide correct offerId',
         'OfferController'
       );
     }
-
-    // TODO: добавить обработку статуса 403
 
     const updatedUser = await this.userService.removeFavoriteOffer(
       userId,
@@ -179,7 +176,7 @@ export class UserController extends BaseController {
     this.ok(res, fillDTO(UserRDO, updatedUser));
   }
 
-  public async getFavoriteOffers(req: Request<ParamUserId>, res: Response) {
+  public async getFavoriteOffers(req: Request, res: Response) {
     const userId = req.tokenPayload.id;
 
     const favoriteOffers = await this.userService.findUserFavorites(userId);
