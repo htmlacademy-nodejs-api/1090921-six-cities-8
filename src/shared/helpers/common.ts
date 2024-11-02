@@ -29,3 +29,7 @@ export function createErrorObject(message: string) {
     error: message,
   };
 }
+
+export function parseBoolean(boolString: string): boolean {
+  return (/true/).test(boolString);
+}

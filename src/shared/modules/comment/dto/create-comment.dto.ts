@@ -1,20 +1,21 @@
 import { IsInt, IsMongoId, IsString, Length, Max, Min } from 'class-validator';
 
-import { CreateCommentMessages } from './create-comment.messages.js';
+import { CREATE_COMMENT_MESSAGES } from './create-comment.messages.js';
+import { COMMENT_RESTRICTIONS } from '../comment.constants.js';
 
 export class CreateCommentDTO {
-  @IsString({ message: CreateCommentMessages.text.invalidFormat })
-  @Length(5, 1024, { message: 'min is 5, max is 1024 '})
+  @IsString({ message: CREATE_COMMENT_MESSAGES.TEXT.INVALID_FORMAT })
+  @Length(COMMENT_RESTRICTIONS.TEXT.MIN_LENGTH, COMMENT_RESTRICTIONS.TEXT.MAX_LENGTH)
   public text: string;
 
-  @IsInt({ message: CreateCommentMessages.rating.invalidFormat })
-  @Min(1, { message: CreateCommentMessages.rating.invalidValue })
-  @Max(5, { message: CreateCommentMessages.rating.invalidValue })
+  @IsInt({ message: CREATE_COMMENT_MESSAGES.RATING.INVALID_FORMAT })
+  @Min(COMMENT_RESTRICTIONS.RATING.MIN, { message: CREATE_COMMENT_MESSAGES.RATING.INVALID_VALUE })
+  @Max(COMMENT_RESTRICTIONS.RATING.MAX, { message: CREATE_COMMENT_MESSAGES.RATING.INVALID_VALUE })
   public rating: number;
 
-  @IsMongoId({ message: CreateCommentMessages.offerId.invalidFormat })
+  @IsMongoId({ message: CREATE_COMMENT_MESSAGES.OFFER_ID.INVALID_FORMAT })
   public offerId: string;
 
-  @IsMongoId({ message: CreateCommentMessages.userId.invalidFormat })
+  @IsMongoId({ message: CREATE_COMMENT_MESSAGES.USER_ID.INVALID_FORMAT })
   public userId: string;
 }

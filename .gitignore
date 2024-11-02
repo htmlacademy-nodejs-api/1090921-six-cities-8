@@ -12,3 +12,5 @@ coverage
 .env
 
 /mocks/offers/
+
+/upload/

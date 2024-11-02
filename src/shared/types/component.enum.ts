@@ -1,21 +1,21 @@
 export const Component = {
-  RestApplication: Symbol('RestApplication'),
-  Logger: Symbol('Logger'),
-  Config: Symbol('Config'),
-  DatabaseClient: Symbol('DatabaseClient'),
+  RestApplication: Symbol(),
+  Logger: Symbol(),
+  Config: Symbol(),
+  DatabaseClient: Symbol(),
 
-  UserService: Symbol('UserService'),
-  UserModel: Symbol('UserModel'),
+  UserService: Symbol(),
+  UserModel: Symbol(),
 
-  OfferService: Symbol('OfferService'),
-  OfferModel: Symbol('OfferModel'),
+  OfferService: Symbol(),
+  OfferModel: Symbol(),
 
-  CommentService: Symbol('CommentService'),
-  CommentModel: Symbol('CommentModel'),
+  CommentService: Symbol(),
+  CommentModel: Symbol(),
 
-  ExceptionFilter: Symbol('ExceptionFilter'),
+  ExceptionFilter: Symbol(),
 
-  UserController: Symbol('UserController'),
-  OfferController: Symbol('OfferController'),
-  CommentController: Symbol('CommentController'),
+  UserController: Symbol(),
+  OfferController: Symbol(),
+  CommentController: Symbol(),
 } as const;

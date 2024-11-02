@@ -47,4 +47,10 @@ export const configRestSchema = convict<RestSchema>({
     env: 'DB_NAME',
     default: null
   },
+  UPLOAD_DIRECTORY: {
+    doc: 'Directory for upload files',
+    format: String,
+    env: 'UPLOAD_DIRECTORY',
+    default: null
+  },
 });

@@ -9,15 +9,15 @@ import {
   HttpMethod,
   ValidateObjectIdMiddleware,
   ValidateDtoMiddleware,
+  ValidateQueryMiddleware,
   DocumentExistsMiddleware,
 } from '../../libs/rest/index.js';
 import { Logger } from '../../libs/logger/index.js';
 import { City, Component } from '../../types/index.js';
 import { OfferService } from './offer-service.interface.js';
-import { fillDTO, RADIX } from '../../helpers/index.js';
+import { fillDTO, parseBoolean } from '../../helpers/index.js';
 import { FullOfferRDO } from './rdo/full-offer.rdo.js';
 import { ShortOfferRDO } from './rdo/short-offer.rdo.js';
-import { MAX_OFFERS_COUNT } from './offer.constants.js';
 import type { RequestQuery } from './type/request-query.type.js';
 import type { ParamOfferId } from './type/params-offer-id.type.js';
 import type { CreateOfferRequest } from './type/create-offer-request.type.js';
@@ -25,6 +25,8 @@ import type { UpdateOfferRequest } from './type/update-offer-request.type.js';
 import { CommentRDO, CommentService } from '../comment/index.js';
 import { CreateOfferDTO } from './dto/create-offer.dto.js';
 import { UpdateOfferDTO } from './dto/update-offer.dto.js';
+import { Types } from 'mongoose';
+import { GetOffersQueryDTO } from './dto/get-offers-query.dto.js';
 
 const MOCKED_LOGGED_IN_USER_ID = '67056f6fc82961263a52dedf';
 
@@ -45,12 +47,20 @@ export class OfferController extends BaseController {
       handler: this.create,
       middlewares: [new ValidateDtoMiddleware(CreateOfferDTO)],
     });
-    this.addRoute({ path: '/', method: HttpMethod.Get, handler: this.index });
+    this.addRoute({
+      path: '/',
+      method: HttpMethod.Get,
+      handler: this.index,
+      middlewares: [new ValidateQueryMiddleware(GetOffersQueryDTO)],
+    });
     this.addRoute({
       path: '/:offerId',
       method: HttpMethod.Get,
       handler: this.show,
-      middlewares: [new ValidateObjectIdMiddleware('offerId'), new DocumentExistsMiddleware(this.offerService, 'Offer', 'offerId'), ],
+      middlewares: [
+        new ValidateObjectIdMiddleware('offerId'),
+        new DocumentExistsMiddleware(this.offerService, 'Offer', 'offerId'),
+      ],
     });
     this.addRoute({
       path: '/:offerId',
@@ -66,13 +76,19 @@ export class OfferController extends BaseController {
       path: '/:offerId',
       method: HttpMethod.Delete,
       handler: this.delete,
-      middlewares: [new ValidateObjectIdMiddleware('offerId'), new DocumentExistsMiddleware(this.offerService, 'Offer', 'offerId'),],
+      middlewares: [
+        new ValidateObjectIdMiddleware('offerId'),
+        new DocumentExistsMiddleware(this.offerService, 'Offer', 'offerId'),
+      ],
     });
     this.addRoute({
       path: '/:offerId/comments',
       method: HttpMethod.Get,
       handler: this.getComments,
-      middlewares: [new ValidateObjectIdMiddleware('offerId'), new DocumentExistsMiddleware(this.offerService, 'Offer', 'offerId'),],
+      middlewares: [
+        new ValidateObjectIdMiddleware('offerId'),
+        new DocumentExistsMiddleware(this.offerService, 'Offer', 'offerId'),
+      ],
     });
   }
 
@@ -92,60 +108,26 @@ export class OfferController extends BaseController {
     const { limit, city, is_premium: isPremium } = req.query;
     const userId = MOCKED_LOGGED_IN_USER_ID;
     // const userId = req.user.id // AFTER JWT
-
-    if (isPremium && city) {
-      await this.getPremiumOffers(req, res);
-      return;
-    }
-
-    // TODO: добавить валидацию и доработать обработку статуса 400 BAD_REQUEST
-    const validatedLimit = limit
-      ? parseInt(limit?.toString(), RADIX)
-      : MAX_OFFERS_COUNT;
-    if (Number.isNaN(validatedLimit)) {
-      throw new HttpError(
-        StatusCodes.BAD_REQUEST,
-        'Please provide correct limit',
-        'OfferController'
-      );
-    }
-
     const offers = await this.offerService.find({
-      limit: validatedLimit,
+      limit,
       userId,
+      city: city ? city as City : undefined,
+      isPremium: isPremium ? parseBoolean(isPremium) : undefined
     });
     this.ok(res, fillDTO(ShortOfferRDO, offers));
   }
 
-  private async getPremiumOffers(
-    req: Request<ParamsDictionary, unknown, unknown, RequestQuery>,
-    res: Response
-  ) {
-    const { city } = req.query;
-    const userId = MOCKED_LOGGED_IN_USER_ID;
-    // const userId = req.user.id // AFTER JWT
+  public async show(req: Request<ParamOfferId>, res: Response) {
+    const { offerId } = req.params;
 
-    if (!city) {
+    if (!offerId || !Types.ObjectId.isValid(offerId)) {
       throw new HttpError(
         StatusCodes.BAD_REQUEST,
-        'Please provide city name',
+        'Please provide correct offerId',
         'OfferController'
       );
     }
 
-    // TODO: добавить валидацию и обработку статуса 400 BAD_REQUEST
-    const validatedCity = city as City;
-
-    const premiumOffers = await this.offerService.find({
-      city: validatedCity,
-      isPremium: true,
-      userId,
-    });
-    this.ok(res, fillDTO(ShortOfferRDO, premiumOffers));
-  }
-
-  public async show(req: Request<ParamOfferId>, res: Response) {
-    const { offerId } = req.params;
     const userId = MOCKED_LOGGED_IN_USER_ID;
     // const userId = req.user.id // AFTER JWT
 
@@ -157,6 +139,14 @@ export class OfferController extends BaseController {
   public async update(req: UpdateOfferRequest, res: Response) {
     const { offerId } = req.params;
 
+    if (!offerId || !Types.ObjectId.isValid(offerId)) {
+      throw new HttpError(
+        StatusCodes.BAD_REQUEST,
+        'Please provide correct offerId',
+        'OfferController'
+      );
+    }
+
     // TODO: добавить обработку статусов 401, 403
 
     const updatedOffer = await this.offerService.updateById(offerId, req.body);
@@ -165,6 +155,14 @@ export class OfferController extends BaseController {
 
   public async delete(req: Request<ParamOfferId>, res: Response) {
     const { offerId } = req.params;
+
+    if (!offerId || !Types.ObjectId.isValid(offerId)) {
+      throw new HttpError(
+        StatusCodes.BAD_REQUEST,
+        'Please provide correct offerId',
+        'OfferController'
+      );
+    }
 
     // TODO: добавить обработку статусов 401, 403
 

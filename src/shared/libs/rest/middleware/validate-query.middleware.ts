@@ -5,12 +5,12 @@ import { StatusCodes } from 'http-status-codes';
 
 import { Middleware } from './middleware.interface.js';
 
-export class ValidateDtoMiddleware implements Middleware {
+export class ValidateQueryMiddleware implements Middleware {
   constructor(private dto: ClassConstructor<object>) {}
 
-  public async execute({ body }: Request, res: Response, next: NextFunction): Promise<void> {
-    const dtoInstance = plainToInstance(this.dto, body);
-    const errors = await validate(dtoInstance);
+  public async execute(req: Request, res: Response, next: NextFunction): Promise<void> {
+    const queryInstance = plainToInstance(this.dto, req.query);
+    const errors = await validate(queryInstance);
 
     if (errors.length) {
       res.status(StatusCodes.BAD_REQUEST).send(errors);

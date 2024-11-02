@@ -8,7 +8,8 @@ import {
   HttpMethod,
   ValidateObjectIdMiddleware,
   ValidateDtoMiddleware,
-  DocumentExistsMiddleware
+  DocumentExistsMiddleware,
+  UploadFileMiddleware
 } from '../../libs/rest/index.js';
 import { Logger } from '../../libs/logger/index.js';
 import { Component } from '../../types/index.js';
@@ -23,6 +24,7 @@ import type { ParamUserId } from './type/param-userid.type.js';
 import type { RequestQuery } from './type/request-query.type.js';
 import { CreateUserDTO } from './dto/create-user.dto.js';
 import { LoginUserDTO } from './dto/login-user.dto.js';
+import { Types } from 'mongoose';
 
 const MOCKED_LOGGED_IN_USER_ID = '67056f6fc82961263a52dedf';
 
@@ -71,6 +73,15 @@ export class UserController extends BaseController {
       handler: this.getFavoriteOffers,
       middlewares: [new ValidateObjectIdMiddleware('userId'), new DocumentExistsMiddleware(this.userService, 'User', 'userId')],
     });
+    this.addRoute({
+      path: '/:userId/avatar',
+      method: HttpMethod.Post,
+      handler: this.uploadAvatar,
+      middlewares: [
+        new ValidateObjectIdMiddleware('userId'),
+        new UploadFileMiddleware(this.configService.get('UPLOAD_DIRECTORY'), 'avatar'),
+      ]
+    });
   }
 
   public async create(
@@ -79,7 +90,6 @@ export class UserController extends BaseController {
   ): Promise<void> {
     const userExists = await this.userService.findByEmail(body.email);
 
-    // TODO: Добавить обработку статуса 400 BAD_REQUEST
     if (userExists) {
       throw new HttpError(
         StatusCodes.CONFLICT,
@@ -106,7 +116,7 @@ export class UserController extends BaseController {
       );
     }
 
-    // TODO: Добавить обработку статусов 200 и 400 BAD_REQUEST
+    // TODO: Добавить обработку статусов 200
     throw new HttpError(
       StatusCodes.NOT_IMPLEMENTED,
       'Not implemented',
@@ -131,22 +141,19 @@ export class UserController extends BaseController {
     const { offerId } = req.query;
     // const userId = req.user.id; // AFTER JWT
 
-    if (!userId || !offerId) {
+    if (!offerId || !Types.ObjectId.isValid(offerId)) {
       throw new HttpError(
         StatusCodes.BAD_REQUEST,
-        'Please provide userId and offerId',
-        'UserController'
+        'Please provide correct offerId',
+        'OfferController'
       );
     }
 
-    // TODO: добавить обработку статуса 401 NOT_AUTHORIZED, доработать 400 BAD_REQUEST после валидации
-    // TODO: добавить корректную валидацию данных из query
-    const validatedUserId = userId.toString();
-    const validatedOfferId = offerId.toString();
+    // TODO: добавить обработку статуса 401 NOT_AUTHORIZED
 
     const updatedUser = await this.userService.addFavoriteOffer(
-      validatedUserId,
-      validatedOfferId
+      userId,
+      offerId
     );
     this.ok(res, fillDTO(UserRDO, updatedUser));
   }
@@ -159,22 +166,19 @@ export class UserController extends BaseController {
     const { offerId } = req.query;
     // const userId = req.user.id; // AFTER JWT
 
-    if (!userId || !offerId) {
+    if (!offerId || !Types.ObjectId.isValid(offerId)) {
       throw new HttpError(
         StatusCodes.BAD_REQUEST,
-        'Please provide userId and offerId',
-        'UserController'
+        'Please provide correct offerId',
+        'OfferController'
       );
     }
 
-    // TODO: добавить обработку статуса 401 NOT_AUTHORIZED, доработать 400 BAD_REQUEST после валидации
-    // TODO: добавить корректную валидацию данных из query
-    const validatedUserId = userId.toString();
-    const validatedOfferId = offerId.toString();
+    // TODO: добавить обработку статуса 401 NOT_AUTHORIZED
 
     const updatedUser = await this.userService.removeFavoriteOffer(
-      validatedUserId,
-      validatedOfferId
+      userId,
+      offerId
     );
     this.ok(res, fillDTO(UserRDO, updatedUser));
   }
@@ -183,21 +187,17 @@ export class UserController extends BaseController {
     const userId = MOCKED_LOGGED_IN_USER_ID;
     // const userId = req.user.id; // AFTER JWT
 
-    if (!userId) {
-      throw new HttpError(
-        StatusCodes.BAD_REQUEST,
-        'Please provide userId',
-        'UserController'
-      );
-    }
-
-    // TODO: добавить обработку статуса 401 NOT_AUTHORIZED, доработать 400 BAD_REQUEST после валидации
-    // TODO: добавить корректную валидацию данных из query
-    const validatedUserId = userId;
+    // TODO: добавить обработку статуса 401 NOT_AUTHORIZED
 
     const favoriteOffers = await this.userService.findUserFavorites(
-      validatedUserId
+      userId
     );
     this.ok(res, fillDTO(ShortOfferRDO, favoriteOffers));
+  }
+
+  public async uploadAvatar(req: Request, res: Response) {
+    this.created(res, {
+      filepath: req.file?.path
+    });
   }
 }

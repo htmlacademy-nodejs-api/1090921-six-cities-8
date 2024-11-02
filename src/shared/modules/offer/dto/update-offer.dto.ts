@@ -1,68 +1,65 @@
-import { IsOptional, IsArray, IsDateString, IsEnum, IsInt, Max, MaxLength, Min, MinLength, ArrayMinSize, IsObject, IsBoolean } from 'class-validator';
+import { IsOptional, IsArray, IsEnum, IsInt, Max, MaxLength, Min, MinLength, ArrayMinSize, IsObject, IsBoolean } from 'class-validator';
 
 import { City, RentType, Amenity } from '../../../types/index.js';
-import { CreateOfferValidationMessage } from './create-offer.messages.js';
+import { CREATE_OFFER_VALIDATION_MESSAGE } from './create-offer.messages.js';
+import { OFFER_RESTRICTIONS } from '../offer.constants.js';
 
 export class UpdateOfferDTO {
   @IsOptional()
-  @MinLength(10, { message: CreateOfferValidationMessage.title.minLength })
-  @MaxLength(100, { message: CreateOfferValidationMessage.title.maxLength })
+  @MinLength(OFFER_RESTRICTIONS.TITLE.MIN_LENGTH, { message: CREATE_OFFER_VALIDATION_MESSAGE.TITLE.MIN_LENGTH })
+  @MaxLength(OFFER_RESTRICTIONS.TITLE.MAX_LENGTH, { message: CREATE_OFFER_VALIDATION_MESSAGE.TITLE.MAX_LENGTH })
   public title?: string;
 
   @IsOptional()
-  @MinLength(20, { message: CreateOfferValidationMessage.description.minLength })
-  @MaxLength(1024, { message: CreateOfferValidationMessage.description.maxLength })
+  @MinLength(OFFER_RESTRICTIONS.DESCRIPTION.MIN_LENGTH, { message: CREATE_OFFER_VALIDATION_MESSAGE.DESCRIPTION.MIN_LENGTH })
+  @MaxLength(OFFER_RESTRICTIONS.DESCRIPTION.MAX_LENGTH, { message: CREATE_OFFER_VALIDATION_MESSAGE.DESCRIPTION.MAX_LENGTH })
   public description?: string;
 
   @IsOptional()
-  @IsDateString({}, { message: CreateOfferValidationMessage.postDate.invalidFormat })
-  public postDate?: string;
-
-  @IsOptional()
-  @IsEnum(City, { message: CreateOfferValidationMessage.city.invalid })
+  @IsEnum(City, { message: CREATE_OFFER_VALIDATION_MESSAGE.CITY.INVALID })
   public city?: City;
 
   @IsOptional()
-  @MaxLength(256, { message: CreateOfferValidationMessage.image.maxLength })
+  @MaxLength(OFFER_RESTRICTIONS.IMAGE_PREVIEW.MAX_LENGTH, { message: CREATE_OFFER_VALIDATION_MESSAGE.IMAGE.MAX_LENGTH })
   public imagePreview?: string;
 
   @IsOptional()
-  @ArrayMinSize(6, { message: CreateOfferValidationMessage.images.minSize })
+  @ArrayMinSize(OFFER_RESTRICTIONS.IMAGES.ARRAY_MIN_SIZE, { message: CREATE_OFFER_VALIDATION_MESSAGE.IMAGES.MIN_SIZE })
   public images?: string[];
 
   @IsOptional()
-  @IsBoolean({ message: CreateOfferValidationMessage.isPremium.invalid })
+  @IsBoolean({ message: CREATE_OFFER_VALIDATION_MESSAGE.IS_PREMIUM.INVALID })
   public isPremium?: boolean;
 
   @IsOptional()
-  @IsEnum(RentType, { message: CreateOfferValidationMessage.rentType.invalid })
+  @IsEnum(RentType, { message: CREATE_OFFER_VALIDATION_MESSAGE.RENT_TYPE.INVALID })
   public rentType?: RentType;
 
   @IsOptional()
-  @IsInt({ message: CreateOfferValidationMessage.roomsCount.invalidFormat })
-  @Min(1, { message: CreateOfferValidationMessage.roomsCount.minValue })
-  @Max(8, { message: CreateOfferValidationMessage.roomsCount.maxValue })
+  @IsInt({ message: CREATE_OFFER_VALIDATION_MESSAGE.ROOMS_COUNT.INVALID_FORMAT })
+  @Min(OFFER_RESTRICTIONS.ROOMS_COUNT.MIN, { message: CREATE_OFFER_VALIDATION_MESSAGE.ROOMS_COUNT.MIN_VALUE })
+  @Max(OFFER_RESTRICTIONS.ROOMS_COUNT.MAX, { message: CREATE_OFFER_VALIDATION_MESSAGE.ROOMS_COUNT.MAX_VALUE })
   public roomsCount?: number;
 
   @IsOptional()
-  @IsInt({ message: CreateOfferValidationMessage.guestsCount.invalidFormat })
-  @Min(1, { message: CreateOfferValidationMessage.guestsCount.minValue })
-  @Max(10, { message: CreateOfferValidationMessage.guestsCount.maxValue })
+  @IsInt({ message: CREATE_OFFER_VALIDATION_MESSAGE.GUESTS_COUNT.INVALID_FORMAT })
+  @Min(OFFER_RESTRICTIONS.GUESTS_COUNT.MIN, { message: CREATE_OFFER_VALIDATION_MESSAGE.GUESTS_COUNT.MIN_VALUE })
+  @Max(OFFER_RESTRICTIONS.GUESTS_COUNT.MAX, { message: CREATE_OFFER_VALIDATION_MESSAGE.GUESTS_COUNT.MAX_VALUE })
   public guestsCount?: number;
 
   @IsOptional()
-  @IsInt({ message: CreateOfferValidationMessage.price.invalidFormat })
-  @Min(100, { message: CreateOfferValidationMessage.price.minValue })
-  @Max(100000, { message: CreateOfferValidationMessage.price.maxValue })
+  @IsInt({ message: CREATE_OFFER_VALIDATION_MESSAGE.PRICE.INVALID_FORMAT })
+  @Min(OFFER_RESTRICTIONS.PRICE.MIN, { message: CREATE_OFFER_VALIDATION_MESSAGE.PRICE.MIN_VALUE })
+  @Max(OFFER_RESTRICTIONS.PRICE.MAX, { message: CREATE_OFFER_VALIDATION_MESSAGE.PRICE.MAX_VALUE })
   public price?: number;
 
   @IsOptional()
-  @IsArray({ message: CreateOfferValidationMessage.amenities.invalidFormat })
-  @IsEnum(Amenity, { each: true, message: CreateOfferValidationMessage.amenities.invalid })
+  @IsArray({ message: CREATE_OFFER_VALIDATION_MESSAGE.AMENITIES.INVALID_FORMAT })
+  @IsEnum(Amenity, { each: true, message: CREATE_OFFER_VALIDATION_MESSAGE.AMENITIES.INVALID })
   public amenities?: Amenity[];
 
   @IsOptional()
-  @IsObject({ message: CreateOfferValidationMessage.coordinates.invalidObject })
+  @IsObject({ message: CREATE_OFFER_VALIDATION_MESSAGE.COORDINATES.INVALID_OBJECT })
   public coordinates?: Partial<{
     latitude: number;
     longitude: number;
