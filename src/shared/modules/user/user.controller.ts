@@ -6,10 +6,9 @@ import {
   BaseController,
   HttpError,
   HttpMethod,
-  ValidateObjectIdMiddleware,
   ValidateDtoMiddleware,
-  DocumentExistsMiddleware,
-  UploadFileMiddleware
+  UploadFileMiddleware,
+  PrivateRouteMiddleware,
 } from '../../libs/rest/index.js';
 import { Logger } from '../../libs/logger/index.js';
 import { Component } from '../../types/index.js';
@@ -28,15 +27,14 @@ import { Types } from 'mongoose';
 import { AuthService } from '../auth/index.js';
 import { LoggedUserRDO } from './rdo/logged-user.rdo.js';
 
-const MOCKED_LOGGED_IN_USER_ID = '67056f6fc82961263a52dedf';
-
 @injectable()
 export class UserController extends BaseController {
   constructor(
     @inject(Component.Logger) protected readonly logger: Logger,
     @inject(Component.UserService) private readonly userService: UserService,
-    @inject(Component.Config) private readonly configService: Config<RestSchema>,
-    @inject(Component.AuthService) private readonly authService: AuthService,
+    @inject(Component.Config)
+    private readonly configService: Config<RestSchema>,
+    @inject(Component.AuthService) private readonly authService: AuthService
   ) {
     super(logger);
     this.logger.info('Register routes for UserController…');
@@ -59,31 +57,34 @@ export class UserController extends BaseController {
       handler: this.checkAuthenticate,
     });
     this.addRoute({
-      path: '/:userId/favorites',
+      path: '/favorites',
       method: HttpMethod.Post,
       handler: this.addOfferToFavorites,
-      middlewares: [new ValidateObjectIdMiddleware('userId'), new DocumentExistsMiddleware(this.userService, 'User', 'userId')],
+      middlewares: [new PrivateRouteMiddleware()],
     });
     this.addRoute({
-      path: '/:userId/favorites',
+      path: '/favorites',
       method: HttpMethod.Delete,
       handler: this.deleteOfferFromFavorites,
-      middlewares: [new ValidateObjectIdMiddleware('userId'), new DocumentExistsMiddleware(this.userService, 'User', 'userId')],
+      middlewares: [new PrivateRouteMiddleware()],
     });
     this.addRoute({
-      path: '/:userId/favorites',
+      path: '/favorites',
       method: HttpMethod.Get,
       handler: this.getFavoriteOffers,
-      middlewares: [new ValidateObjectIdMiddleware('userId'), new DocumentExistsMiddleware(this.userService, 'User', 'userId')],
+      middlewares: [new PrivateRouteMiddleware()],
     });
     this.addRoute({
-      path: '/:userId/avatar',
+      path: '/avatar',
       method: HttpMethod.Post,
       handler: this.uploadAvatar,
       middlewares: [
-        new ValidateObjectIdMiddleware('userId'),
-        new UploadFileMiddleware(this.configService.get('UPLOAD_DIRECTORY'), 'avatar'),
-      ]
+        new PrivateRouteMiddleware(),
+        new UploadFileMiddleware(
+          this.configService.get('UPLOAD_DIRECTORY'),
+          'avatar'
+        ),
+      ],
     });
   }
 
@@ -118,27 +119,24 @@ export class UserController extends BaseController {
     this.ok(res, responseData);
   }
 
-  public async checkAuthenticate() {
-    // const foundUser = await this.userService.findByEmail(email);
-
-    // if (!foundUser) {
-    //   throw new HttpError(
-    //     StatusCodes.UNAUTHORIZED,
-    //     'Unauthorized',
-    //     'UserController'
-    //   );
-    // }
-
-    // this.ok(res, fillDTO(LoggedUserRDO, foundUser));
+  public async checkAuthenticate({ tokenPayload: { email }}: Request, res: Response) {
+    const foundUser = await this.userService.findByEmail(email);
+    if (!foundUser) {
+      throw new HttpError(
+        StatusCodes.UNAUTHORIZED,
+        'Unauthorized',
+        'UserController'
+      );
+    }
+    this.ok(res, fillDTO(LoggedUserRDO, foundUser));
   }
 
   public async addOfferToFavorites(
     req: Request<ParamUserId, unknown, unknown, RequestQuery>,
     res: Response
   ) {
-    const { userId } = req.params;
+    const userId = req.tokenPayload.id;
     const { offerId } = req.query;
-    // const userId = req.user.id; // AFTER JWT
 
     if (!offerId || !Types.ObjectId.isValid(offerId)) {
       throw new HttpError(
@@ -148,7 +146,7 @@ export class UserController extends BaseController {
       );
     }
 
-    // TODO: добавить обработку статуса 401 NOT_AUTHORIZED
+    // TODO: добавить обработку статуса 403
 
     const updatedUser = await this.userService.addFavoriteOffer(
       userId,
@@ -161,9 +159,8 @@ export class UserController extends BaseController {
     req: Request<ParamUserId, unknown, unknown, RequestQuery>,
     res: Response
   ) {
-    const { userId } = req.params;
+    const userId = req.tokenPayload.id;
     const { offerId } = req.query;
-    // const userId = req.user.id; // AFTER JWT
 
     if (!offerId || !Types.ObjectId.isValid(offerId)) {
       throw new HttpError(
@@ -173,7 +170,7 @@ export class UserController extends BaseController {
       );
     }
 
-    // TODO: добавить обработку статуса 401 NOT_AUTHORIZED
+    // TODO: добавить обработку статуса 403
 
     const updatedUser = await this.userService.removeFavoriteOffer(
       userId,
@@ -182,21 +179,16 @@ export class UserController extends BaseController {
     this.ok(res, fillDTO(UserRDO, updatedUser));
   }
 
-  public async getFavoriteOffers(_req: Request<ParamUserId>, res: Response) {
-    const userId = MOCKED_LOGGED_IN_USER_ID;
-    // const userId = req.user.id; // AFTER JWT
+  public async getFavoriteOffers(req: Request<ParamUserId>, res: Response) {
+    const userId = req.tokenPayload.id;
 
-    // TODO: добавить обработку статуса 401 NOT_AUTHORIZED
-
-    const favoriteOffers = await this.userService.findUserFavorites(
-      userId
-    );
+    const favoriteOffers = await this.userService.findUserFavorites(userId);
     this.ok(res, fillDTO(ShortOfferRDO, favoriteOffers));
   }
 
   public async uploadAvatar(req: Request, res: Response) {
     this.created(res, {
-      filepath: req.file?.path
+      filepath: req.file?.path,
     });
   }
 }

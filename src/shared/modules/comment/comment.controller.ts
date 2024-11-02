@@ -6,6 +6,7 @@ import {
   BaseController,
   HttpError,
   HttpMethod,
+  PrivateRouteMiddleware,
   ValidateDtoMiddleware,
 } from '../../libs/rest/index.js';
 import { Component } from '../../types/index.js';
@@ -32,7 +33,10 @@ export default class CommentController extends BaseController {
       path: '/',
       method: HttpMethod.Post,
       handler: this.create,
-      middlewares: [new ValidateDtoMiddleware(CreateCommentDTO)],
+      middlewares: [
+        new PrivateRouteMiddleware(),
+        new ValidateDtoMiddleware(CreateCommentDTO),
+      ],
     });
   }
 
@@ -48,7 +52,10 @@ export default class CommentController extends BaseController {
       );
     }
 
-    const comment = await this.commentService.create({ ...body, userId: tokenPayload.id });
+    const comment = await this.commentService.create({
+      ...body,
+      userId: tokenPayload.id,
+    });
     this.created(res, fillDTO(CommentRDO, comment));
   }
 }

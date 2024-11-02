@@ -75,19 +75,13 @@ paths:
         '401':
           description: Пользователь не авторизован
 
-  /users/{userId}/favorites:
+  /users/favorites:
     post:
       summary: Добавление предложения в избранное
       description: Ресурс для добавления предложения в список избранных предложений пользователя.
       tags:
         - users
       parameters:
-        - name: userId
-          in: path
-          description: ID пользователя
-          required: true
-          schema:
-            type: string
         - name: offerId
           in: query
           description: ID предложения, которое нужно добавить в избранное
@@ -110,12 +104,6 @@ paths:
       tags:
         - users
       parameters:
-        - name: userId
-          in: path
-          description: ID пользователя
-          required: true
-          schema:
-            type: string
         - name: offerId
           in: query
           description: ID предложения, которое нужно удалить из избранного
@@ -137,13 +125,6 @@ paths:
       description: Ресурс для получения списка избранных предложений пользователя.
       tags:
         - users
-      parameters:
-        - name: userId
-          in: path
-          description: ID пользователя
-          required: true
-          schema:
-            type: string
       security:
         - bearerAuth: []
       responses:

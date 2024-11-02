@@ -11,6 +11,7 @@ import {
   ValidateDtoMiddleware,
   ValidateQueryMiddleware,
   DocumentExistsMiddleware,
+  PrivateRouteMiddleware,
 } from '../../libs/rest/index.js';
 import { Logger } from '../../libs/logger/index.js';
 import { City, Component } from '../../types/index.js';
@@ -28,8 +29,6 @@ import { UpdateOfferDTO } from './dto/update-offer.dto.js';
 import { Types } from 'mongoose';
 import { GetOffersQueryDTO } from './dto/get-offers-query.dto.js';
 
-const MOCKED_LOGGED_IN_USER_ID = '67056f6fc82961263a52dedf';
-
 @injectable()
 export class OfferController extends BaseController {
   constructor(
@@ -45,7 +44,10 @@ export class OfferController extends BaseController {
       path: '/',
       method: HttpMethod.Post,
       handler: this.create,
-      middlewares: [new ValidateDtoMiddleware(CreateOfferDTO)],
+      middlewares: [
+        new PrivateRouteMiddleware(),
+        new ValidateDtoMiddleware(CreateOfferDTO),
+      ],
     });
     this.addRoute({
       path: '/',
@@ -67,6 +69,7 @@ export class OfferController extends BaseController {
       method: HttpMethod.Patch,
       handler: this.update,
       middlewares: [
+        new PrivateRouteMiddleware(),
         new ValidateObjectIdMiddleware('offerId'),
         new ValidateDtoMiddleware(UpdateOfferDTO),
         new DocumentExistsMiddleware(this.offerService, 'Offer', 'offerId'),
@@ -77,6 +80,7 @@ export class OfferController extends BaseController {
       method: HttpMethod.Delete,
       handler: this.delete,
       middlewares: [
+        new PrivateRouteMiddleware(),
         new ValidateObjectIdMiddleware('offerId'),
         new DocumentExistsMiddleware(this.offerService, 'Offer', 'offerId'),
       ],
@@ -93,11 +97,13 @@ export class OfferController extends BaseController {
   }
 
   public async create(
-    { body }: CreateOfferRequest,
+    { body, tokenPayload }: CreateOfferRequest,
     res: Response
   ): Promise<void> {
-    // TODO: добавить обработку статусов 401 NOT_AUTHORIZED
-    const result = await this.offerService.create(body);
+    const result = await this.offerService.create({
+      ...body,
+      author: tokenPayload.id,
+    });
     this.created(res, fillDTO(FullOfferRDO, result));
   }
 
@@ -106,18 +112,19 @@ export class OfferController extends BaseController {
     res: Response
   ) {
     const { limit, city, is_premium: isPremium } = req.query;
-    const userId = MOCKED_LOGGED_IN_USER_ID;
-    // const userId = req.user.id // AFTER JWT
+    const userId = req.tokenPayload.id;
+
     const offers = await this.offerService.find({
       limit,
       userId,
-      city: city ? city as City : undefined,
-      isPremium: isPremium ? parseBoolean(isPremium) : undefined
+      city: city ? (city as City) : undefined,
+      isPremium: isPremium ? parseBoolean(isPremium) : undefined,
     });
     this.ok(res, fillDTO(ShortOfferRDO, offers));
   }
 
   public async show(req: Request<ParamOfferId>, res: Response) {
+    const userId = req.tokenPayload.id;
     const { offerId } = req.params;
 
     if (!offerId || !Types.ObjectId.isValid(offerId)) {
@@ -127,9 +134,6 @@ export class OfferController extends BaseController {
         'OfferController'
       );
     }
-
-    const userId = MOCKED_LOGGED_IN_USER_ID;
-    // const userId = req.user.id // AFTER JWT
 
     const offer = await this.offerService.findById(offerId, userId);
 
@@ -147,7 +151,7 @@ export class OfferController extends BaseController {
       );
     }
 
-    // TODO: добавить обработку статусов 401, 403
+    // TODO: добавить обработку статусов 403
 
     const updatedOffer = await this.offerService.updateById(offerId, req.body);
     this.ok(res, fillDTO(FullOfferRDO, updatedOffer));
@@ -164,7 +168,7 @@ export class OfferController extends BaseController {
       );
     }
 
-    // TODO: добавить обработку статусов 401, 403
+    // TODO: добавить обработку статусов 403
 
     const deletedOffer = await this.offerService.deleteById(offerId);
     this.noContent(res, fillDTO(FullOfferRDO, deletedOffer));
