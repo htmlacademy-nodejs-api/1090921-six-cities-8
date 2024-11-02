@@ -5,6 +5,7 @@ export {
   getRandomItem,
   fillDTO,
   createErrorObject,
+  parseBoolean,
 } from './common.js';
 
 export {

@@ -1,16 +1,16 @@
-export const CreateCommentMessages = {
-  text: {
-    invalidFormat: 'text is required',
-    lengthField: 'min length is 5, max is 2024'
+export const CREATE_COMMENT_MESSAGES = {
+  TEXT: {
+    INVALID_FORMAT: 'text is required',
+    LENGTH_FIELD: 'min length is 5, max is 2024'
   },
-  offerId: {
-    invalidFormat: 'offerId field must be a valid id'
+  OFFER_ID: {
+    INVALID_FORMAT: 'offerId field must be a valid id'
   },
-  userId: {
-    invalidFormat: 'userId field must be a valid id'
+  USER_ID: {
+    INVALID_FORMAT: 'userId field must be a valid id'
   },
-  rating: {
-    invalidFormat: 'rating must be an integer',
-    invalidValue: 'rating must be a number from 1 to 5'
+  RATING: {
+    INVALID_FORMAT: 'rating must be an integer',
+    INVALID_VALUE: 'rating must be a number from 1 to 5'
   }
 } as const;
