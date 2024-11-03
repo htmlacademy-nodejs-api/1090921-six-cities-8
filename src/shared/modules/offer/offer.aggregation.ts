@@ -17,29 +17,24 @@ const lookupForFavorites = (userId: string) => ({
     as: 'isFavoriteArray',
   },
 });
-const addIsFavoriteField = {
+const ADD_IS_FAVORITE_FIELD = {
   $addFields: {
     isFavorite: { $gt: [{ $size: '$isFavoriteArray' }, 0] },
   },
 };
-const addOfferFields = {
-  $addFields: {
-    id: AGGREGATIONS.addId,
-    commentsCount: AGGREGATIONS.addCommentsCount,
-    rating: AGGREGATIONS.addRating,
-  },
-};
+
+const SINGLE_RESULT = 1;
 
 export const findOfferByIdAggregation = (offerId: string, userId?: string) => {
   const pipeline = [
     { $match: { _id: new Types.ObjectId(offerId) } },
-    AGGREGATIONS.lookupFromComments,
-    AGGREGATIONS.populateAuthor,
-    AGGREGATIONS.unwindAuthor,
-    addOfferFields,
-    ...(userId ? [lookupForFavorites(userId), addIsFavoriteField] : []),
-    { $unset: ['comments'] },
-    { $limit: 1 },
+    AGGREGATIONS.LOOKUP_FROM_COMMENTS,
+    AGGREGATIONS.POPULATE_AUTHOR,
+    AGGREGATIONS.UNWIND_AUTHOR,
+    AGGREGATIONS.ADD_OFFER_FIELDS,
+    ...(userId ? [lookupForFavorites(userId), ADD_IS_FAVORITE_FIELD] : []),
+    AGGREGATIONS.UNSET_COMMENTS,
+    { $limit: SINGLE_RESULT },
   ];
 
   return pipeline;
@@ -71,13 +66,13 @@ export const findOffersAggregation = ({
   const filterNeeded = !!Object.keys(matchConditions).length;
 
   const pipeline = [
-    AGGREGATIONS.lookupFromComments,
-    AGGREGATIONS.populateAuthor,
-    AGGREGATIONS.unwindAuthor,
-    addOfferFields,
-    { $unset: ['comments'] },
-    ...(userId ? [lookupForFavorites(userId), addIsFavoriteField] : []),
+    AGGREGATIONS.LOOKUP_FROM_COMMENTS,
+    AGGREGATIONS.POPULATE_AUTHOR,
+    AGGREGATIONS.UNWIND_AUTHOR,
+    AGGREGATIONS.ADD_OFFER_FIELDS,
+    ...(userId ? [lookupForFavorites(userId), ADD_IS_FAVORITE_FIELD] : []),
     ...(filterNeeded ? [{ $match: matchConditions }] : []),
+    AGGREGATIONS.UNSET_COMMENTS,
     { $limit: limit || MAX_OFFERS_COUNT },
     { $sort: { postDate: SortType.Down } },
   ];

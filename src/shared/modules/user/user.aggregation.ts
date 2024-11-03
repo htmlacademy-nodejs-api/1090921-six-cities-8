@@ -11,9 +11,9 @@ const lookupForUserFavorites = (userId: string) => ({
     as: 'userFavorites',
   },
 });
-const unwindUserFavorites = { $unwind: '$userFavorites' };
-const unwindFavorites = { $unwind: '$userFavorites.favorites' };
-const matchFavorites = {
+const UNWIND_USER_FAVORITES = { $unwind: '$userFavorites' };
+const UNWIND_FAVORITES = { $unwind: '$userFavorites.favorites' };
+const MATCH_FAVORITES = {
   $match: {
     $expr: {
       $eq: ['$_id', '$userFavorites.favorites'],
@@ -21,23 +21,19 @@ const matchFavorites = {
   },
 };
 
-const addOfferFields = {
-  $addFields: {
-    id: AGGREGATIONS.addId,
-    commentsCount: AGGREGATIONS.addCommentsCount,
-    rating: AGGREGATIONS.addRating,
-    isFavorite: { $literal: true },
-  },
-};
-
 export const findUserFavorites = (userId: string) => [
   lookupForUserFavorites(userId),
-  unwindUserFavorites,
-  unwindFavorites,
-  matchFavorites,
-  AGGREGATIONS.lookupFromComments,
-  addOfferFields,
-  AGGREGATIONS.populateAuthor,
-  AGGREGATIONS.unwindAuthor,
-  { $unset: ['comments'] },
+  UNWIND_USER_FAVORITES,
+  UNWIND_FAVORITES,
+  MATCH_FAVORITES,
+  AGGREGATIONS.LOOKUP_FROM_COMMENTS,
+  {
+    $addFields: {
+      ...AGGREGATIONS.ADD_OFFER_FIELDS.$addFields,
+      isFavorite: { $literal: true },
+    }
+  },
+  AGGREGATIONS.POPULATE_AUTHOR,
+  AGGREGATIONS.UNWIND_AUTHOR,
+  AGGREGATIONS.UNSET_COMMENTS,
 ];
