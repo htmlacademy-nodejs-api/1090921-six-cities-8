@@ -1,6 +1,5 @@
 import {
   defaultClasses,
-  getModelForClass,
   modelOptions,
   prop,
   Ref
@@ -37,5 +36,3 @@ export class CommentEntity extends defaultClasses.TimeStamps {
   })
   public userId: Ref<UserEntity>;
 }
-
-export const CommentModel = getModelForClass(CommentEntity);

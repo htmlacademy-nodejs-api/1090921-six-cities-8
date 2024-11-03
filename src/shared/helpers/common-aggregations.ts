@@ -25,7 +25,7 @@ const addCommentsCount = { $size: '$comments' };
 const addRating = {
   $cond: {
     if: { $gt: [{ $size: '$comments' }, 0] },
-    then: { $avg: '$comments.rating' },
+    then: { $round: [{ $avg: '$comments.rating' }, 0] },
     else: null,
   },
 };

@@ -5,10 +5,9 @@ POST http://localhost:5000/comments HTTP/1.1
 Content-Type: application/json
 
 {
-  "rating": 3,
+  "rating": 5,
   "text": "Как обстоят дела с коробками?",
-  "offerId": "671697acf3a04cae3182f3f2",
-  "userId": "6706c86eb45be07dc9d0f930"
+  "offerId": "67056f6fc82961263a52dee7"
 }
 
 ###

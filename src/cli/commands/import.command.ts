@@ -2,11 +2,12 @@ import { Command } from './types/command.interface.js';
 import { TSVFileReader } from '../../shared/libs/file-reader/index.js';
 import { getMongoURI } from '../../shared/helpers/index.js';
 import { Offer } from '../../shared/types/offer.interface.js';
-import { DefaultUserService, UserModel, UserService } from '../../shared/modules/user/index.js';
-import { DefaultOfferService, OfferModel, OfferService } from '../../shared/modules/offer/index.js';
+import { DefaultUserService, UserService } from '../../shared/modules/user/index.js';
+import { DefaultOfferService, OfferService } from '../../shared/modules/offer/index.js';
 import { DatabaseClient, MongoDatabaseClient } from '../../shared/libs/database-client/index.js';
 import { Logger } from '../../shared/libs/logger/index.js';
 import { ConsoleLogger } from '../../shared/libs/logger/console.logger.js';
+import { OfferModel, UserModel } from '../../shared/modules/index.js';
 
 const DEFAULT_DB_PORT = '27017';
 const DEFAULT_USER_PASSWORD = '123456';
