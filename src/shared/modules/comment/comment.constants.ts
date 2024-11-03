@@ -1,3 +1,5 @@
+export const MAX_COMMENTS_COUNT = 50;
+
 export const COMMENT_RESTRICTIONS = {
   TEXT: {
     MIN_LENGTH: 5,

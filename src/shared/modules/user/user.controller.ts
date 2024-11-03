@@ -6,7 +6,7 @@ import {
   BaseController,
   HttpError,
   HttpMethod,
-  ValidateDtoMiddleware,
+  ValidateBodyMiddleware,
   ValidateQueryMiddleware,
   UploadFileMiddleware,
   PrivateRouteMiddleware,
@@ -44,13 +44,13 @@ export class UserController extends BaseController {
       path: '/register',
       method: HttpMethod.Post,
       handler: this.create,
-      middlewares: [new ValidateDtoMiddleware(CreateUserDTO)],
+      middlewares: [new ValidateBodyMiddleware(CreateUserDTO)],
     });
     this.addRoute({
       path: '/login',
       method: HttpMethod.Post,
       handler: this.login,
-      middlewares: [new ValidateDtoMiddleware(LoginUserDTO)],
+      middlewares: [new ValidateBodyMiddleware(LoginUserDTO)],
     });
     this.addRoute({
       path: '/login',
@@ -129,7 +129,7 @@ export class UserController extends BaseController {
         'UserController'
       );
     }
-    this.ok(res, fillDTO(LoggedUserRDO, foundUser));
+    this.ok(res, fillDTO(UserRDO, foundUser));
   }
 
   public async addOfferToFavorites(
