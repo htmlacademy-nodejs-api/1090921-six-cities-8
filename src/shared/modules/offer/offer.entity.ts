@@ -1,6 +1,5 @@
 import {
   defaultClasses,
-  getModelForClass,
   modelOptions,
   prop,
   Ref
@@ -8,7 +7,6 @@ import {
 
 import { City, RentType, Amenity, Coordinates } from '../../types/index.js';
 import { UserEntity } from '../user/index.js';
-import { CommentEntity } from '../comment/comment.entity.js';
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export interface OfferEntity extends defaultClasses.Base {}
@@ -63,7 +61,7 @@ export class OfferEntity extends defaultClasses.TimeStamps {
   public amenities!: Amenity[];
 
   @prop({
-    ref: 'UserEntity',
+    ref: () => UserEntity,
     required: true
   })
   public author!: Ref<UserEntity>;
@@ -71,20 +69,9 @@ export class OfferEntity extends defaultClasses.TimeStamps {
   @prop({ _id: false, required: true })
   public coordinates!: Coordinates;
 
-  @prop({
-    ref: 'CommentEntity',
-    required: true,
-    default: [],
-    _id: false,
-    select: false
-  })
-  public comments!: Ref<CommentEntity>[];
-
   @prop()
   public commentsCount!: number;
 
   @prop({ default: false })
   public isPremium: boolean;
 }
-
-export const OfferModel = getModelForClass(OfferEntity);

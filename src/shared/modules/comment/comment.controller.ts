@@ -1,5 +1,5 @@
 import { inject, injectable } from 'inversify';
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
 import {
@@ -7,7 +7,9 @@ import {
   HttpError,
   HttpMethod,
   PrivateRouteMiddleware,
-  ValidateDtoMiddleware,
+  RequestParams,
+  ValidateBodyMiddleware,
+  ValidateQueryMiddleware,
 } from '../../libs/rest/index.js';
 import { Component } from '../../types/index.js';
 import { Logger } from '../../libs/logger/index.js';
@@ -17,6 +19,8 @@ import { fillDTO } from '../../helpers/index.js';
 import { CommentRDO } from './rdo/comment.rdo.js';
 import { CreateCommentRequest } from './types/create-comment-request.type.js';
 import { CreateCommentDTO } from './dto/create-comment.dto.js';
+import { GetOfferCommentsQueryDTO } from './dto/get-comments-query.dto.js';
+import { RequestQuery } from './types/request-query.type.js';
 
 @injectable()
 export default class CommentController extends BaseController {
@@ -35,7 +39,15 @@ export default class CommentController extends BaseController {
       handler: this.create,
       middlewares: [
         new PrivateRouteMiddleware(),
-        new ValidateDtoMiddleware(CreateCommentDTO),
+        new ValidateBodyMiddleware(CreateCommentDTO),
+      ],
+    });
+    this.addRoute({
+      path: '/',
+      method: HttpMethod.Get,
+      handler: this.index,
+      middlewares: [
+        new ValidateQueryMiddleware(GetOfferCommentsQueryDTO)
       ],
     });
   }
@@ -57,5 +69,24 @@ export default class CommentController extends BaseController {
       userId: tokenPayload?.id,
     });
     this.created(res, fillDTO(CommentRDO, comment));
+  }
+
+
+  public async index(
+    req: Request<RequestParams, unknown, unknown, RequestQuery>,
+    res: Response
+  ): Promise<void> {
+    const { offerId } = req.query;
+
+    if (!offerId) {
+      throw new HttpError(
+        StatusCodes.BAD_REQUEST,
+        'Please provide correct offerId',
+        'CommentController'
+      );
+    }
+
+    const comments = await this.commentService.findByOfferId(offerId);
+    this.ok(res, fillDTO(CommentRDO, comments));
   }
 }

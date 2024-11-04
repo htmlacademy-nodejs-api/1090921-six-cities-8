@@ -8,7 +8,7 @@ import {
   HttpError,
   HttpMethod,
   ValidateObjectIdMiddleware,
-  ValidateDtoMiddleware,
+  ValidateBodyMiddleware,
   ValidateQueryMiddleware,
   DocumentExistsMiddleware,
   PrivateRouteMiddleware,
@@ -23,7 +23,7 @@ import type { RequestQuery } from './type/request-query.type.js';
 import type { ParamOfferId } from './type/params-offer-id.type.js';
 import type { CreateOfferRequest } from './type/create-offer-request.type.js';
 import type { UpdateOfferRequest } from './type/update-offer-request.type.js';
-import { CommentRDO, CommentService } from '../comment/index.js';
+import { CommentService } from '../comment/index.js';
 import { CreateOfferDTO } from './dto/create-offer.dto.js';
 import { UpdateOfferDTO } from './dto/update-offer.dto.js';
 import { Types } from 'mongoose';
@@ -46,7 +46,7 @@ export class OfferController extends BaseController {
       handler: this.create,
       middlewares: [
         new PrivateRouteMiddleware(),
-        new ValidateDtoMiddleware(CreateOfferDTO),
+        new ValidateBodyMiddleware(CreateOfferDTO),
       ],
     });
     this.addRoute({
@@ -71,7 +71,7 @@ export class OfferController extends BaseController {
       middlewares: [
         new PrivateRouteMiddleware(),
         new ValidateObjectIdMiddleware('offerId'),
-        new ValidateDtoMiddleware(UpdateOfferDTO),
+        new ValidateBodyMiddleware(UpdateOfferDTO),
         new DocumentExistsMiddleware(this.offerService, 'Offer', 'offerId'),
       ],
     });
@@ -81,15 +81,6 @@ export class OfferController extends BaseController {
       handler: this.delete,
       middlewares: [
         new PrivateRouteMiddleware(),
-        new ValidateObjectIdMiddleware('offerId'),
-        new DocumentExistsMiddleware(this.offerService, 'Offer', 'offerId'),
-      ],
-    });
-    this.addRoute({
-      path: '/:offerId/comments',
-      method: HttpMethod.Get,
-      handler: this.getComments,
-      middlewares: [
         new ValidateObjectIdMiddleware('offerId'),
         new DocumentExistsMiddleware(this.offerService, 'Offer', 'offerId'),
       ],
@@ -173,15 +164,9 @@ export class OfferController extends BaseController {
       );
     }
 
+    await this.commentService.deleteMany(offerId);
+
     const deletedOffer = await this.offerService.deleteById(offerId);
     this.noContent(res, fillDTO(FullOfferRDO, deletedOffer));
-  }
-
-  public async getComments(
-    { params }: Request<ParamOfferId>,
-    res: Response
-  ): Promise<void> {
-    const comments = await this.commentService.findByOfferId(params.offerId);
-    this.ok(res, fillDTO(CommentRDO, comments));
   }
 }

@@ -284,29 +284,6 @@ paths:
           description: Пользователь не имеет прав для удаления
         '404':
           description: Предложение не найдено
-  /offers/{offerId}/comments:
-    get:
-      summary: Получение списка комментариев для предложения
-      description: Получение всех комментариев, связанных с предложением
-      tags:
-        - comments
-      parameters:
-        - name: offerId
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Список комментариев
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/comment'
-        '404':
-          description: Комментарии не найдены
     
   /comments:
     post:
@@ -333,6 +310,28 @@ paths:
           description: Пользователь не авторизован
         '400':
           description: Неверные данные для добавления комментария
+    get:
+      summary: Получение списка комментариев для предложения
+      description: Получение всех комментариев, связанных с предложением
+      tags:
+        - comments
+      parameters:
+        - name: offerId
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Список комментариев
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/comment'
+        '404':
+          description: Комментарии не найдены
 
 components:
   securitySchemes:

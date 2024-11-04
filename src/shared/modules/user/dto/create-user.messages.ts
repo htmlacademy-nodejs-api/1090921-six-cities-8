@@ -1,19 +1,19 @@
-export const CreateUserMessages = {
-  email: {
-    invalidFormat: 'email must be a valid address'
+export const CREATE_USER_MESSAGES = {
+  EMAIL: {
+    INVALID_FORMAT: 'email must be a valid address',
   },
-  avatarPath: {
-    invalidFormat: 'avatarPath is required',
+  AVATAR_PATH: {
+    INVALID_FORMAT: 'avatarPath is required',
   },
-  name: {
-    invalidFormat: 'firstname is required',
-    lengthField: 'min length is 1, max is 15',
+  NAME: {
+    INVALID_FORMAT: 'firstname is required',
+    LENGTH_FIELD: 'min length is 1, max is 15',
   },
-  password: {
-    invalidFormat: 'password is required',
-    lengthField: 'min length for password is 6, max is 12'
+  PASSWORD: {
+    INVALID_FORMAT: 'password is required',
+    LENGTH_FIELD: 'min length for password is 6, max is 12',
   },
-  type: {
-    invalidFormat: 'type must be one of: pro, обычный'
-  }
+  TYPE: {
+    INVALID_FORMAT: 'type must be one of: pro, обычный',
+  },
 } as const;
