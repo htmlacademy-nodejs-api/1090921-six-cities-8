@@ -26,16 +26,19 @@ export class DefaultOfferService implements OfferService {
     const result = await this.offerModel.create(dto);
     this.logger.info(`New offer created: ${dto.title}`);
 
-    return result;
+    const pipeline = findOfferByIdAggregation(result._id.toString(), dto.author);
+    const [fullOfferData] = await this.offerModel.aggregate(pipeline);
+
+    return fullOfferData;
   }
 
   public async findById(
     offerId: string, userId?: string
   ): Promise<DocumentType<OfferEntity> | null> {
     const pipeline = findOfferByIdAggregation(offerId, userId);
-    const result = await this.offerModel.aggregate(pipeline).exec();
+    const [result] = await this.offerModel.aggregate(pipeline).exec();
 
-    return result[0] || null;
+    return result;
   }
 
   public async find({ limit, city, isPremium, isFavorite, userId }: {
@@ -65,10 +68,14 @@ export class DefaultOfferService implements OfferService {
     offerId: string,
     dto: UpdateOfferDTO
   ): Promise<DocumentType<OfferEntity> | null> {
-    return this.offerModel
+    const result = await this.offerModel
       .findByIdAndUpdate(offerId, dto, { new: true })
-      .populate(['author'])
-      .exec();
+      .populate(['author']);
+
+    const pipeline = findOfferByIdAggregation(offerId, result?.author.id);
+    const [fullOfferData] = await this.offerModel.aggregate(pipeline);
+
+    return fullOfferData;
   }
 
   public async exists(documentId: string): Promise<boolean> {

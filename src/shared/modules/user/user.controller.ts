@@ -27,6 +27,7 @@ import { LoginUserDTO } from './dto/login-user.dto.js';
 import { AuthService } from '../auth/index.js';
 import { LoggedUserRDO } from './rdo/logged-user.rdo.js';
 import { UpdateFavoritesQueryDTO } from './dto/update-favorites-query.dto.js';
+import { FullOfferRDO } from '../offer/rdo/full-offer.rdo.js';
 
 @injectable()
 export class UserController extends BaseController {
@@ -147,11 +148,11 @@ export class UserController extends BaseController {
       );
     }
 
-    const updatedUser = await this.userService.addFavoriteOffer(
+    const addedOffer = await this.userService.addFavoriteOffer(
       userId,
       offerId
     );
-    this.ok(res, fillDTO(UserRDO, updatedUser));
+    this.ok(res, fillDTO(FullOfferRDO, addedOffer));
   }
 
   public async deleteOfferFromFavorites(
@@ -169,11 +170,11 @@ export class UserController extends BaseController {
       );
     }
 
-    const updatedUser = await this.userService.removeFavoriteOffer(
+    const deletedOffer = await this.userService.removeFavoriteOffer(
       userId,
       offerId
     );
-    this.ok(res, fillDTO(UserRDO, updatedUser));
+    this.ok(res, fillDTO(FullOfferRDO, deletedOffer));
   }
 
   public async getFavoriteOffers(req: Request, res: Response) {
