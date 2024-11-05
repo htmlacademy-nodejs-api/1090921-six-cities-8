@@ -12,8 +12,8 @@ export interface UserService extends DocumentExists {
   findById(userId: string): Promise<DocumentType<UserEntity> | null>;
   findOrCreate(dto: CreateUserDTO, salt: string): Promise<DocumentType<UserEntity>>;
   findUserFavorites(userId: string): Promise<DocumentType<OfferEntity>[]>;
-  addFavoriteOffer(userId: string, offerId: string): Promise<DocumentType<UserEntity> | null>;
-  removeFavoriteOffer(userId: string, offerId: string): Promise<DocumentType<UserEntity> | null>;
+  addFavoriteOffer(userId: string, offerId: string): Promise<DocumentType<OfferEntity> | null>;
+  removeFavoriteOffer(userId: string, offerId: string): Promise<DocumentType<OfferEntity> | null>;
   updateById(userId: string, dto: UpdateUserDTO): Promise<DocumentType<UserEntity> | null>;
   exists(documentId: string): Promise<boolean>;
 }
