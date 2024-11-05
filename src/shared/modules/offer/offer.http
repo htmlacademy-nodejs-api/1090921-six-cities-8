@@ -20,7 +20,7 @@ Content-Type: application/json
 
 {
   "title": "Hamburger village",
-  "description": "Test description",
+  "description": "Test description Test description Test description",
   "postDate": "2024-05-12T11:56:37.573Z",
   "city": "Hamburg",
   "imagePreview": "image.jpg",
@@ -54,7 +54,7 @@ Content-Type: application/json
 
 {
   "title": "Квартира 2",
-  "description": "Проверка обновления",
+  "description": "Проверка обновления Проверка обновления Проверка обновления",
   "price": 1100
 }
 

@@ -8,7 +8,7 @@ import { UpdateUserDTO } from './dto/update-user.dto.js';
 import { Component } from '../../types/index.js';
 import { Logger } from '../../libs/logger/index.js';
 import { OfferEntity } from '../offer/index.js';
-import { findUserFavorites } from './user.aggregation.js';
+import { findFavoriteOffer, findUserFavorites } from './user.aggregation.js';
 
 @injectable()
 export class DefaultUserService implements UserService {
@@ -47,9 +47,7 @@ export class DefaultUserService implements UserService {
   public async findUserFavorites(
     userId: string
   ): Promise<DocumentType<OfferEntity>[]> {
-    return this.offerModel
-      .aggregate(findUserFavorites(userId))
-      .exec();
+    return this.offerModel.aggregate(findUserFavorites(userId)).exec();
   }
 
   public async findOrCreate(
@@ -75,27 +73,31 @@ export class DefaultUserService implements UserService {
   public async addFavoriteOffer(
     userId: string,
     offerId: string
-  ): Promise<DocumentType<UserEntity> | null> {
-    return this.userModel
-      .findByIdAndUpdate(
-        userId,
-        { $addToSet: { favorites: offerId } },
-        { new: true }
-      )
-      .exec();
+  ): Promise<DocumentType<OfferEntity> | null> {
+    await this.userModel.findByIdAndUpdate(
+      userId,
+      { $addToSet: { favorites: offerId } },
+      { new: true }
+    );
+
+    const pipeline = findFavoriteOffer(offerId, userId);
+    const [result] = await this.offerModel.aggregate(pipeline).exec();
+    return result;
   }
 
   public async removeFavoriteOffer(
     userId: string,
     offerId: string
-  ): Promise<DocumentType<UserEntity> | null> {
-    return this.userModel
-      .findByIdAndUpdate(
-        userId,
-        { $pull: { favorites: offerId } },
-        { new: true }
-      )
-      .exec();
+  ): Promise<DocumentType<OfferEntity> | null> {
+    await this.userModel.findByIdAndUpdate(
+      userId,
+      { $pull: { favorites: offerId } },
+      { new: true }
+    );
+
+    const pipeline = findFavoriteOffer(offerId, userId);
+    const [result] = await this.offerModel.aggregate(pipeline).exec();
+    return result;
   }
 
   public async exists(documentId: string): Promise<boolean> {
